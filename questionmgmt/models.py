@@ -1,6 +1,22 @@
 from django.db import models
 from djangotoolbox.fields import DictField, ListField
+from testmgmt.models import *
 
-# Create your models here.
 class Questions(models.Model):
     question_text   = models.CharField(max_length=500)
+    
+
+
+
+
+
+# class Mock(models.Model):
+    # name = models.CharField
+
+
+
+
+
+
+
+
