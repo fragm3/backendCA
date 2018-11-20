@@ -1,0 +1,11 @@
+git+https://github.com/django-nonrel/django.git
+git+https://github.com/django-nonrel/djangotoolbox
+git+https://github.com/django-nonrel/mongodb-engine
+ipython
+requests
+xlwt
+lxml
+pylint<2.0.0
+mongo
+requests
+urllib3
