@@ -56,11 +56,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'OverallManagement.middleware.corsMiddleware',
-    'OverallManagement.disable.DisableCSRF',
+    'overall.middleware.corsMiddleware',
+    'overall.disable.DisableCSRF',
 )
 
-AUTH_USER_MODEL = 'UserManagement.CAUsers'
+AUTH_USER_MODEL = 'usermgmt.CAUsers'
 
 ROOT_URLCONF = 'backendCA.urls'
 
