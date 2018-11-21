@@ -2,10 +2,16 @@ from django.db import models
 from djangotoolbox.fields import DictField, ListField
 from questionmgmt.models import Question
 
-# Create your models here.
+# To Do
+# 1) Test Settings Profile Creation
+    # Can Create Test and Import as Abstract Test
+    # Need to check insertion of question directly
 
 class Instructions(models.Model):
     instruction = models.CharField(max_length=3000)
+# Should this be many to many mapping with test and section
+
+
 
 
 class Test(models.Model):
@@ -21,7 +27,7 @@ class Test(models.Model):
     timer_type              = models.CharField(max_length=20,default="elapsed")
     # remaining / elapsed
     interface_type          = models.CharField(max_length=50,default="general")
-    # General/NMAT
+    # general/nmat
     num_options_mcq         = models.IntegerField(default=4)
     created_at              = models.DateTimeField()
     modified_at             = models.DateTimeField()
@@ -34,7 +40,8 @@ class Test(models.Model):
     # sectional/overall     
     num_blank_allowed      = models.IntegerField()
     blank_negative_marks   = models.FloatField()   
-    num_instructions       = models.IntegerField() 
+    num_instructions       = models.IntegerField()
+
 
 # Instructions to be added
 
@@ -70,4 +77,3 @@ class SectionQuestions(Question):
 
 
 
-# Instructions to be added

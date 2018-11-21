@@ -21,6 +21,8 @@ class Passage(models.Model):
     section_4_header   = models.CharField(max_length=50)
     section_4_text     = models.CharField(max_length=1000)
 
+# Should this be many to many mapping
+
 
 class Question(models.Model):
     question_text            = models.CharField(max_length=500)
