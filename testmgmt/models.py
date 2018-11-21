@@ -4,6 +4,8 @@ from questionmgmt.models import Question
 
 # To Do
 # 1) Test Settings Profile Creation
+# 2) Profile both of section and test
+   
     # Can Create Test and Import as Abstract Test
     # Need to check insertion of question directly
 
@@ -12,11 +14,8 @@ class Instructions(models.Model):
 # Should this be many to many mapping with test and section
 
 
-
-
 class Test(models.Model):
     name                    = models.CharField(max_length=100)
-    # test_type               = models.CharField(max_length=20)
     number_sections         = models.IntegerField()
     is_section_sequence     = models.BooleanField(default=True) 
     is_sectional_jump       = models.BooleanField(default=False)
