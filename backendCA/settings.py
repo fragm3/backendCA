@@ -66,7 +66,7 @@ ROOT_URLCONF = 'backendCA.urls'
 
 WSGI_APPLICATION = 'backendCA.wsgi.application'
 
-
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 

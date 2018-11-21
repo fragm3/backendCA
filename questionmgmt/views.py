@@ -1,170 +1,302 @@
 from django.shortcuts import render
-
+from django.http import HttpResponseRedirect,HttpResponseForbidden,HttpResponse
+from django.core.paginator import Paginator
+from django.core import serializers
+from models import *
+from overall.views import get_param,cleanstring
+import math
+import json
 # Create your views here.
 
-
-from lxml.html import document_fromstring
-import json
-import requests
-import re
-import urllib
-
-
-# Generic Functions
-def cleanstring(query):
-    query = query.strip()
-    query = re.sub('\s{2,}', ' ', query)
-    query = re.sub(r'^"|"$', '', query)
-    return query
-
-def mid(s, offset, amount):
-    return s[offset:amount]
-
-
-
-# Question Import From Edoola
-cookies = {
-    '_ga': 'GA1.2.290460516.1542006845',
-    'csrftoken': 'RZfxEUJOTOczvUr8kGAFQf8lYYXMpxEt',
-    'sessionid': 'k8jnuqbwzsf09zc0qkk8cdvpghj5kqyq',
-    '_gid': 'GA1.2.2040430800.1542631858',
-    '_gat': '1',
-}
-
-headers = {
-    'Pragma': 'no-cache',
-    'Accept-Encoding': 'gzip, deflate',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36',
-    'Accept': '*/*',
-    'Referer': 'http://careeranna.edoola.com/manage/content/',
-    'X-Requested-With': 'XMLHttpRequest',
-    'Connection': 'keep-alive',
-    'Cache-Control': 'no-cache',
-}
-
-
-# Folders Download
-def download_folders():
+def crud_topics(request):
     obj = {}
+    obj['status'] = False
+    obj['result'] = []
+    obj['message'] = "Request Recieved"
+    operation = get_param(request, 'operation', "Read")
+    tranObjs = []
+    if operation == "read":
+        page_num = get_param(request, 'page_num', None)
+        page_size = get_param(request, 'page_size', None)
+        search_id = get_param(request,'search_id',None)    
+        if search_id != None and search_id != "":
+            tranObjs = Topics.objects.filter(id=search_id)
+        else:
+            tranObjs = Topics.objects.all()
+            # Filters/Sorting Start
+        
+            # Filters/Sorting End
+        # pagination variable
+        num_pages = 1
+        total_records = tranObjs.count()    
+        if page_num != None and page_num != "":
+            page_num = int(page_num)
+            tranObjs = Paginator(tranObjs, int(page_size))
+            try:
+                tranObjs = tranObjs.page(page_num)
+            except:
+                tranObjs = tranObjs
+            num_pages = int(math.ceil(total_records / float(int(page_size))))
+        # data = list(tranObjs)
+        obj['message'] = "Success"
+        obj['num_pages'] = num_pages
+        obj['total_records'] = total_records
 
-    params = (
-        ('folder_id', ''),
-    )
+    if operation == "create":
+        category     = get_param(request, 'category', None)
+        sub_category = get_param(request, 'subcategory', None)
+        description  = get_param(request,'desc',None)
+        category     = cleanstring(category).lower()
+        sub_category = cleanstring(sub_category).lower()
+        description  = cleanstring(description).lower()
+        tranObjs     = Topics.objects.filter(category=category,sub_category=sub_category)
 
-    response_folders = requests.get('http://careeranna.edoola.com/manage/content/', headers=headers, params=params, cookies=cookies)
-    output_folderlist = response_folders.content
-    doc_folders = document_fromstring(output_folderlist)
-    folder_table = (doc_folders.xpath("//table[contains(@id, 'folder_table')]/tr/td"))
+        if len(tranObjs):
+            obj['message'] = "Topic Already Exists!"
+        else:
+            topic = Topics.objects.create(category=category,sub_category=sub_category,description=description)
+            tranObjs = [topic]
+            obj['message'] = "Topic Created"
 
+    if operation == "update":
+        data_id      = get_param(request, 'data_id', None)
+        
+        category     = get_param(request, 'category', None)
+        sub_category = get_param(request, 'subcategory', None)
+        description  = get_param(request,'desc',None)
 
-    list_folders = []
-
-    for folder in folder_table:
-        folderobj = {}
-        folder_name = ""
-        folder_id = ""
-        folder_id = folder.xpath("./@id")[0]
-        folder_name = cleanstring(folder.text_content())
-        folderobj = {"folder_id":folder_id,"folder_name":folder_name}
-        list_folders.append(folderobj)
-
-    obj = {'folders':list_folders}
-    return  obj
-
-# Tests Download in a folder
-def download_tests_infolder(folder_id='1962'):
-    obj = {}
-    params = (
-        ('folder_id', folder_id),
-    )
-    response_tests = requests.get('http://careeranna.edoola.com/manage/content/list/', headers=headers, params=params, cookies=cookies)
-    output_testlist = response_tests.content
-    doc_test = document_fromstring(output_testlist)
-    tests_table = (doc_test.xpath("//table[contains(@class,'table')]/tr"))
-
-    list_tests = []
-    row = 0
-    for test in tests_table:
+        category = cleanstring(category).lower()
+        sub_category = cleanstring(sub_category).lower()
+        description = cleanstring(description).lower()
         try:
-            td = test.xpath("./td")
-            test_obj = {}
-            vanilla_link = td[0].xpath("./a/@href")[0]
-            test_name = td[0].text_content()
-            type = td[1].text_content()
-            date_modified = td[2].text_content()
-            question_count = td[3].text_content()
-            score_count = td[4].text_content()
-            questions_link = ("http://careeranna.edoola.com" + vanilla_link.replace("/detail/", '/questions/'))
-            details_link = ("http://careeranna.edoola.com" + vanilla_link)
-            test_details_link = questions_link
-            test_obj = {"name":cleanstring(test_name),
-                        "details_link":details_link,
-                        "question_link":questions_link,
-                        "type":cleanstring(type),
-                        "date_modified":cleanstring(date_modified),
-                        "score_count":score_count,
-                        "question_count":question_count}
-            list_tests.append(test_obj)
+            topic = Topics.objects.get(id=data_id)
         except:
-            None
-    obj = {'tests':list_tests}
-    return obj
+            topic = None
+        obj['message'] = "Topic Not Found"
+        if topic:
+            topic.category = category
+            topic.sub_category = sub_category
+            topic.description = description
+            topic.save()
+            tranObjs = [topic]
+            obj['message'] = "Topic Updated"
 
-
-
-def download_questions(question_link = 'http://careeranna.edoola.com/manage/tests/questions/cat-2018-sectional-test-19-verbal-ability-and-reading-comprehension-1/',details_link = 'http://careeranna.edoola.com/manage/tests/detail/xat-mock-subhankar-qa_di-1/'):
-    obj = {}
-    response_details = requests.get(details_link, headers=headers, cookies=cookies)
-    output_details = response_details.content
-    paper_details_start = output_details.find("question_paper =",1)
-    paper_details_end = output_details.find("paged_questions =",1)
-
-    paper_details_data = (mid(output_details, paper_details_start + 17, paper_details_end)).replace(";\n        ", "")
-    paper_details_data_json = json.loads(paper_details_data)
-
-    page_num = 1
-    params = (
-        ('page', str(page_num)),
-    )
-    questions_list = []
-    response_questions = requests.get(question_link, headers=headers, params=params, cookies=cookies)
-    ques_content = response_questions._content
-    question_json = json.loads(ques_content)
-    page = question_json['paged_questions']['page']
-    has_next = page['has_next']
-    questions_list = question_json['paged_questions']['questions']
-    while has_next:
-        page_num = page_num + 1
-        params = (
-            ('page', str(page_num)),
-        )
-        response_questions = requests.get(question_link,headers=headers, params=params, cookies=cookies)
-        ques_content = response_questions._content
-        question_json = json.loads(ques_content)
-        page = question_json['paged_questions']['page']
-        has_next = page['has_next']
-        new_questions = question_json['paged_questions']['questions']
-        questions_list.extend(new_questions)
-    pure_question = []
-    passages = []
-    for ques in questions_list:
+    if operation == "delete":
+        data_id      = get_param(request, 'data_id', None)
         try:
-            if ques['question_number'] == "P":
-                passages.append(ques)
-            elif int(ques['question_number'])>=1:
-                pure_question.append(ques)
+            topic = Topics.objects.get(id=data_id)
         except:
-            None
-    obj = {'passages':passages,'questions':pure_question,'details':paper_details_data_json}
-    return obj
+            topic = None
+        obj['message'] = "Topic Not Found"        
+        if topic:
+            topic.delete()
+            obj['message'] = "Topic Deleted"
 
+    for trans in tranObjs:
+        obj['result'].append({
+        'id':trans.id,
+        'category':trans.category,
+        'sub_category':trans.sub_category,
+        'description':trans.description
+    })
+    obj['status'] = True
+    return HttpResponse(json.dumps(obj), content_type='application/json')
 
-def download_question_image(link):
-    urllib.urlretrieve("http://www.gunnerkrigg.com//comics/00000001.jpg", "00000001.jpg")
+def crud_folders(request):
+    obj = {}
+    obj['status'] = False
+    obj['result'] = []
+    obj['message'] = "Request Recieved"
+    tranObjs = []
+    operation = get_param(request, 'operation', "Read")
+    if operation == "read":
+        tranObjs = None
+        page_num = get_param(request, 'page_num', None)
+        page_size = get_param(request, 'page_size', None)
+        search_id = get_param(request,'search_id',None)    
+        if search_id != None and search_id != "":
+            tranObjs = QuestionFolder.objects.filter(id=search_id)
+        else:
+            tranObjs = QuestionFolder.objects.all()
+            # Filters/Sorting Start
+        
+            # Filters/Sorting End
+        # pagination variable
+        num_pages = 1
+        total_records = tranObjs.count()    
+        if page_num != None and page_num != "":
+            page_num = int(page_num)
+            tranObjs = Paginator(tranObjs, int(page_size))
+            try:
+                tranObjs = tranObjs.page(page_num)
+            except:
+                tranObjs = tranObjs
+            num_pages = int(math.ceil(total_records / float(int(page_size))))
+        # data = list(tranObjs)
+        obj['message'] = "Success"
+        obj['num_pages'] = num_pages
+        obj['total_records'] = total_records
 
+    if operation == "create":
+        folder_name  = get_param(request, 'folder_name', None)
+        description  = get_param(request,'desc',None)
 
+        folder_name  = cleanstring(folder_name).lower()
+        description  = cleanstring(description).lower()
 
+        tranObjs     = QuestionFolder.objects.filter(folder_name=folder_name)
 
+        if len(tranObjs):
+            obj['message'] = "Folder Already Exists!"
+        else:
+            folder = QuestionFolder.objects.create(folder_name=folder_name,description=description)
+            tranObjs = [folder]
+            obj['message'] = "Folder Created"
+
+    if operation == "update":
+        data_id      = get_param(request, 'data_id', None)
+        folder_name  = get_param(request, 'folder_name', None)
+        description  = get_param(request,'desc',None)
+
+        folder_name  = cleanstring(folder_name).lower()
+        description  = cleanstring(description).lower()
+        try:
+            folder = QuestionFolder.objects.get(id=data_id)
+        except:
+            folder = None
+        obj['message'] = "Folder Not Found"
+        if folder:
+            folder.folder_name = folder_name
+            folder.description = description
+            folder.save()
+            tranObjs = [folder]
+        obj['message'] = "Folder Updated"
+
+    if operation == "delete":
+        data_id      = get_param(request, 'data_id', None)
+        try:
+            folder  = QuestionFolder.objects.get(id=data_id)
+        except:
+            folder = None
+        obj['message'] = "Folder Not Found"
+        if folder:
+            folder.delete()
+            obj['message'] = "Folder Deleted"
+
+    for trans in tranObjs:
+        obj['result'].append({
+        'id':trans.id,
+        'folder_name':trans.folder_name,
+        'description':trans.description
+    })
+    obj['status'] = True
+    return HttpResponse(json.dumps(obj), content_type='application/json')
+
+# Query Correction at deletion pending 
+def crud_passages(request):
+    obj = {}
+    obj['status'] = False
+    obj['result'] = []
+    obj['message'] = "Request Recieved"
+    operation = get_param(request, 'operation', "read")
+    tranObjs = []
+    if operation == "read":
+        page_num = get_param(request, 'page_num', None)
+        page_size = get_param(request, 'page_size', None)
+        search_id = get_param(request,'search_id',None)    
+        if search_id != None and search_id != "":
+            tranObjs = Passages.objects.filter(id=search_id)
+        else:
+            tranObjs = Passages.objects.all()
+            # Filters/Sorting Start
+        
+            # Filters/Sorting End
+        # pagination variable
+        num_pages = 1
+        total_records = tranObjs.count()    
+        if page_num != None and page_num != "":
+            page_num = int(page_num)
+            tranObjs = Paginator(tranObjs, int(page_size))
+            try:
+                tranObjs = tranObjs.page(page_num)
+            except:
+                tranObjs = tranObjs
+            num_pages = int(math.ceil(total_records / float(int(page_size))))
+        # data = list(tranObjs)
+        obj['message'] = "Success"
+        obj['num_pages'] = num_pages
+        obj['total_records'] = total_records
+
+    if operation == "create":
+        header      = get_param(request, 'header', None)
+        text        = get_param(request, 'text', None)
+        order       = get_param(request, 'order', "1")
+        data_dict   = get_param(request, 'data_dict', [])
+        if data_dict:
+            data_dict = json.loads(data_dict)
+        order        = int(order)
+        tranObjs     = Passages.objects.filter(header=header,text=text)
+
+        if len(tranObjs):
+            obj['message'] = "Passage Already Exists!"
+        else:
+            passage = Passages.objects.create(header=header,text=text,order=order,data_table=data_dict)
+            tranObjs = [passage]
+            obj['message'] = "Passage Created"
+
+    if operation == "update":
+        data_id      = get_param(request, 'data_id', None)
+        header      = get_param(request, 'header', None)
+        text        = get_param(request, 'text', None)
+        order       = get_param(request, 'order', "1")
+        data_dict   = get_param(request, 'data_dict', [])
+        if data_dict:
+            data_dict = json.loads(data_dict)
+        order        = int(order)  
+        try:         
+            passage = Passages.objects.get(id=data_id)
+        except:
+            passage = None
+        obj['message'] = "Passage Not Found"
+        if passage:
+            passage.header = header
+            passage.text = text
+            passage.order = order
+            passage.data_table = data_dict
+            passage.save()
+            tranObjs = [passage]
+            obj['message'] = "Passage Updated"
+
+    if operation == "delete":
+        data_id      = get_param(request, 'data_id', None)
+        try:     
+            passage = Passages.objects.get(id=data_id)
+        except:
+            passage = None
+        obj['message'] = "Passage Not Found"        
+        if passage:
+            questions_linked = passage.questions_set.all()
+            try:
+                print len(questions_linked)
+                if questions_linked:
+                    obj['message'] = "Passage Linked To Questions Can't Be Deleted"
+                    # To Be Checked After Question Addions
+                else:
+                    passage.delete()
+                    obj['message'] = "Passage Deleted"
+            except:
+                    passage.delete()
+                    obj['message'] = "Passage Deleted"
+
+    for trans in tranObjs:
+        obj['result'].append({
+        'id':trans.id,
+        'header':trans.header,
+        'text':trans.text,
+        'order':trans.order,
+        'data_table':trans.data_table
+    })
+    obj['status'] = True
+    return HttpResponse(json.dumps(obj), content_type='application/json')
 
 

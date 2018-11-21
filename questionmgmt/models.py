@@ -1,34 +1,30 @@
 from django.db import models
 from djangotoolbox.fields import DictField, ListField
-# from testmgmt.models import *
+from usermgmt.models import CAUsers
 
 
 # answer_dict = dict(option_id='',option_text = '')
-
-class Topic(models.Model):
+class Topics(models.Model):
     category     = models.CharField(max_length=50)
     sub_category = models.CharField(max_length=50)
+    description  = models.CharField(max_length=300,null=True)
 
-
-class Passage(models.Model):
-    total_sections     = models.IntegerField(default=1)
-    section_1_header   = models.CharField(max_length=50)
-    section_1_text     = models.CharField(max_length=1000)
-    section_2_header   = models.CharField(max_length=50)
-    section_2_text     = models.CharField(max_length=1000)
-    section_3_header   = models.CharField(max_length=50)
-    section_3_text     = models.CharField(max_length=1000)
-    section_4_header   = models.CharField(max_length=50)
-    section_4_text     = models.CharField(max_length=1000)
-
+class Passages(models.Model):
+    header      = models.CharField(max_length=50)
+    text        = models.CharField(max_length=1000)
+    order       = models.IntegerField(default=1)
+    data_table  = ListField(DictField())
+    
 # Should this be many to many mapping
+class QuestionFolder(models.Model):
+    folder_name = models.CharField(max_length=100)
+    description  = models.CharField(max_length=300,null=True)
 
-
-class Question(models.Model):
+class QuestionStructure(models.Model):
     question_text            = models.CharField(max_length=500)
     question_type            = models.CharField(max_length=50)
-    # mcq_single, mcq_multiple, word, number, essay, chooseorder, drop_down
-    topic                    = models.ForeignKey(Topic,
+    # mcq_single, mcq_multiple, word, number, essay, chooseorder, in_question_drop_down, in_question_word, in_question_number
+    topic                    = models.ForeignKey(Topics,
                                 on_delete=models.SET_NULL,
                                 null=True)
     answer_in_between        = models.BooleanField(default=False)
@@ -36,45 +32,54 @@ class Question(models.Model):
     difficulty_user          = models.IntegerField()
     to_evaluate              = models.BooleanField(default=True)
     is_passage               = models.BooleanField()
-    passage                  = models.ForeignKey(Passage,
-                                        on_delete=models.CASCADE,
-                                        null=True)
+    passage                  = models.ManyToManyField(Passages)
     num_correct_answered     = models.IntegerField()
     num_total_answered       = models.IntegerField()
-    answer_options           = ListField(DictField())
-    correct_answer           = ListField(models.CharField(max_length=4))
+    answer_options           = DictField()
+    correct_answer           = DictField()
     is_random_order          = models.BooleanField(default=False)
     # range 1 to 6
     created_at               = models.DateTimeField()
     modified_at              = models.DateTimeField()
+    created_by               = models.ForeignKey(CAUsers,
+                                    on_delete=models.SET_NULL,
+                                    null=True)
+    question_folder          = models.ForeignKey(QuestionFolder,
+                                                on_delete=models.SET_NULL,
+                                                null=True)
     class Meta:
-            abstract = True    
+        abstract = True    
+
+class Questions(QuestionStructure):
+    pass
+
+
+
+
 
 
 answer_options_dict = {
-'set1':[
-        {"id":"Shashwat Yadav","text":"Shashwat Yadav"},
+    '1':[
+            {"id":"Shashwat Yadav","text":"Shashwat Yadav"},
         ],
-    # word, number
-'set2':[
+    # word, number, in_question_word, in_question_number
+    '2':[
          {"id":"1","text":"sample text"},
          {"id":"2","text":"sample text 2"},
          ]
-    # mcq_single, mcq_multiple,  chooseorder, drop_down
+    # mcq_single, mcq_multiple, chooseorder, drop_down, in_question_dropdown
 }
 
 correct_answer_dict = {
-    'set1':["Shashwat Yadav"],
-    # word, number
-    'set2':["2","1"],
-    # mcq_single, mcq_multiple,  chooseorder, drop_down
+    '1':["Shashwat Yadav"],
+    # word, number, in_question_word, in_question_number
+    '2':["2","1"],
+    # mcq_single, mcq_multiple, chooseorder, drop_down, in_question_dropdown
 }
 
 
-    # To sort value in beetween question question type
 
 
-# class TestQuestions(abstractQuse):
 
 
 
