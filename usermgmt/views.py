@@ -173,8 +173,6 @@ def create_check_user(firstname,lastname,email):
             user_new.save()
             return user_new
 
-
-
 # logging in with password
 def login_view_staff(request):
     obj = {}
