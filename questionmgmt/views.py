@@ -13,7 +13,7 @@ def crud_topics(request):
     obj['status'] = False
     obj['result'] = []
     obj['message'] = "Request Recieved"
-    operation = get_param(request, 'operation', "Read")
+    operation = get_param(request, 'operation', "read")
     tranObjs = []
     if operation == "read":
         page_num = get_param(request, 'page_num', None)
@@ -108,7 +108,7 @@ def crud_folders(request):
     obj['result'] = []
     obj['message'] = "Request Recieved"
     tranObjs = []
-    operation = get_param(request, 'operation', "Read")
+    operation = get_param(request, 'operation', "read")
     if operation == "read":
         tranObjs = None
         page_num = get_param(request, 'page_num', None)
@@ -170,7 +170,7 @@ def crud_folders(request):
             folder.description = description
             folder.save()
             tranObjs = [folder]
-        obj['message'] = "Folder Updated"
+            obj['message'] = "Folder Updated"
 
     if operation == "delete":
         data_id      = get_param(request, 'data_id', None)

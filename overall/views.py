@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.db.models import Q
 import datetime
 import re
+import random
+import string
 # Create your views here.
 
 # Generic Functions
@@ -36,3 +38,8 @@ def set_cookie(response, key, value, days_expire = 7):
         max_age = days_expire * 24 * 60 * 60
     expires = datetime.datetime.strftime(datetime.datetime.utcnow() + datetime.timedelta(seconds=max_age), "%a, %d-%b-%Y %H:%M:%S GMT")
     response.set_cookie(key, value, max_age=max_age, expires=expires)
+
+# Random String Generator
+
+def random_str_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for x in range(size))

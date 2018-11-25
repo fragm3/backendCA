@@ -45,7 +45,8 @@ INSTALLED_APPS = (
     'testmgmt',
     'questionmgmt',
     'usermgmt',
-    'overall'
+    'overall',
+    'mailing'
 
 )
 
