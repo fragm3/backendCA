@@ -4,12 +4,11 @@ from django.http import HttpResponseRedirect,HttpResponseForbidden,HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator
 from models import CAUsers
+from mailing import views as mailing
 import math
 import json
-from mailing import views as mailing
-# Create your views here.
-# <---------------- User Registration and Login start ------------------->
 
+# Create your views here.
 # Creating or checking a users existence in the database
 def crud_user(request):
     obj = {}
@@ -155,7 +154,8 @@ def crud_user(request):
         'email':trans.email,
         'is_manager':trans.is_manager,
         'is_staff':trans.is_staff,
-        'secret_string':trans.secret_string
+        'secret_string':trans.secret_string,
+        'auth_token':trans.auth_token
 
     })
     obj['status'] = True
@@ -168,8 +168,10 @@ def create_check_user(firstname,lastname,email):
         if len(users):
             return users[0]
         else:
-            user_new = CAUsers(first_name=firstname,last_name=lastname,email=email)
+            user_new = CAUsers.objects.create(first_name=firstname,last_name=lastname,email=email)
             user_new.set_password("careerannafirstlogin")
+            user_new.secret_string = (user_new.id + random_str_generator())
+            user_new.auth_token = (user_new.id + random_str_generator())
             user_new.save()
             return user_new
 
@@ -180,49 +182,82 @@ def login_view_staff(request):
     email           = get_param(request, 'email', None)
     password        = get_param(request, 'pass', None)
     secret_string   = get_param(request, 'sec_string', None)
-    email = email.lower()
-    email = cleanstring(email)
+    auth_token      = get_param(request, 'auth_token', None)
+    print auth_token
+    if email:
+        email = email.lower()
+        email = cleanstring(email)
     obj['result'] = {}
     obj['user'] = {}
-    try:
-        user = CAUsers.objects.get(email=email)
-        if user:
+    message = ""
+    if auth_token:
+        try:
+            user = CAUsers.objects.get(auth_token=auth_token)
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             message = "User Found"
-            if user.check_password(password):
-                login(request, user)
-                
-                obj['user']['id'] = user.id
-                obj['user']['first_name'] = user.first_name
-                obj['user']['last_name'] = user.last_name
-                obj['user']['email'] = user.email
-                obj['user']['is_admin'] = user.is_admin
-                obj['user']['is_manager'] = user.is_manager
-                obj['user']['is_staff'] = user.is_staff
-                obj['result']['auth'] = True
-                message = "Login Success!"
-            elif user.login_string == secret_string:
-                login(request, user)
-                obj['user']['id'] = user.id
-                obj['user']['first_name'] = user.first_name
-                obj['user']['last_name'] = user.last_name
-                obj['user']['email'] = user.email
-                obj['user']['is_admin'] = user.is_admin
-                obj['user']['is_manager'] = user.is_manager
-                obj['user']['is_staff'] = user.is_staff
-                obj['result']['auth'] = True
-                message = "Login Success!"
+            login(request, user)
+            obj['user']['auth_token'] = auth_token
+            obj['user']['id'] = user.id
+            obj['user']['first_name'] = user.first_name
+            obj['user']['last_name'] = user.last_name
+            obj['user']['email'] = user.email
+            obj['user']['is_admin'] = user.is_admin
+            obj['user']['is_manager'] = user.is_manager
+            obj['user']['is_staff'] = user.is_staff
+            obj['result']['auth'] = True
+            message = "Login Success!"
+        except:
+            obj['result']['auth'] = False
+            message = "Auth Token Expired"
+            obj['user'] = None
+    else:
+        try:
+            user = CAUsers.objects.get(email=email)
+            if user:
+                user.backend = 'django.contrib.auth.backends.ModelBackend'
+                message = "User Found"
+                if user.check_password(password):
+                    login(request, user)
+                    new_string = user.id + random_str_generator()
+                    user.auth_token = new_string
+                    obj['user']['auth_token'] = new_string
+                    obj['user']['id'] = user.id
+                    obj['user']['first_name'] = user.first_name
+                    obj['user']['last_name'] = user.last_name
+                    obj['user']['email'] = user.email
+                    obj['user']['is_admin'] = user.is_admin
+                    obj['user']['is_manager'] = user.is_manager
+                    obj['user']['is_staff'] = user.is_staff
+                    obj['result']['auth'] = True
+                    message = "Login Success!"
+                    user.save()
+                elif user.secret_string == secret_string:
+                    login(request, user)
+                    new_string = user.id + random_str_generator()
+                    user.auth_token = new_string
+                    obj['user']['auth_token'] = new_string
+                    obj['user']['id'] = user.id
+                    obj['user']['first_name'] = user.first_name
+                    obj['user']['last_name'] = user.last_name
+                    obj['user']['email'] = user.email
+                    obj['user']['is_admin'] = user.is_admin
+                    obj['user']['is_manager'] = user.is_manager
+                    obj['user']['is_staff'] = user.is_staff
+                    obj['result']['auth'] = True
+                    message = "Login Success!"
+                    user.save()
+                else:
+                    message = "Incorrect Password"
+                    obj['result']['auth'] = False
             else:
-                message = "Incorrect Password or Secret String"
+                message = "User Doesn't exist"
                 obj['result']['auth'] = False
-        else:
-            message = "User Doesn't exist"
+                obj['user'] = None
+        except CAUsers.DoesNotExist:
+            if email:
+                message = "User Doesn't exist"
             obj['result']['auth'] = False
             obj['user'] = None
-    except CAUsers.DoesNotExist:
-        message = "User Doesn't exist"
-        obj['result']['auth'] = False
-        obj['user'] = None
     obj['status'] = True
     obj['message'] = message
     response = HttpResponse(json.dumps(obj), content_type='application/json')
@@ -261,7 +296,9 @@ def reset_pass_staff(request):
         user = CAUsers.objects.get(secret_string=secret_string)
         user.set_password(password)
         randstring = user.id + random_str_generator(size=6)
+        randstring2 = user.id + random_str_generator(size=6)
         user.secret_string = randstring
+        user.auth_token = randstring2
         user.save()
         obj['message'] = "Password Reset Success"
     except:
@@ -269,14 +306,18 @@ def reset_pass_staff(request):
     obj['status'] = True
     
     return HttpResponse(json.dumps(obj), content_type='application/json')
-
 # logging out
+
 def logout_view_staff(request):
     obj = {}
     obj['status'] = False
+    user = request.user
+    user.auth_token = user.id + random_str_generator()
+    user.save()
     logout(request)
     obj['result'] = "Logout Success"
     obj['status'] = True
+    
     response = HttpResponse(json.dumps(obj), content_type='application/json')
     return response
 
