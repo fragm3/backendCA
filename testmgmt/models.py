@@ -73,7 +73,6 @@ class TestStructure(models.Model):
     class Meta:
         abstract= True
 
-
 # Generic Profile of section
 class SectionStructure(models.Model):
     number_questions        = models.IntegerField()
@@ -111,7 +110,6 @@ class Tests(TestStructure):
     def __str__(self):
         return self.test_name
     
-    
 
 class Section(SectionStructure):
     name                    = models.CharField(max_length=100)
@@ -124,7 +122,6 @@ class Section(SectionStructure):
     created_by              = models.ForeignKey(CAUsers,
                                                 on_delete=models.SET_NULL,
                                                 null=True)
-
 
 class TestProfile(TestStructure):
     profile_name            = models.CharField(max_length=100)

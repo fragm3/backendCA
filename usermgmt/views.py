@@ -96,7 +96,7 @@ def crud_user(request):
         is_admin         = get_param(request, 'is_admin', "0")
         is_manager       = get_param(request, 'is_manager', "0")
         is_staff         = get_param(request, 'is_staff', "0")
-
+        is_activate      = get_param(request,'activate',"1")
         fname  = fname.lower()
         lname  = lname.lower()
         fname  = cleanstring(fname)
@@ -107,7 +107,14 @@ def crud_user(request):
         except:
             user = None
         obj['message'] = "User Not Found"
+
         if user:
+            if is_activate:
+                if is_activate == "0":
+                    user.active = False
+                else:
+                    user.active = True
+
             user.first_name = fname
             user.last_name  = lname
             if is_admin:
@@ -142,7 +149,8 @@ def crud_user(request):
 
         # Code Correction Required Later after checking links
         if user:
-            user.delete()
+            user.active = False
+            user.save()
             obj['message'] = "User Deleted"
 
     for trans in tranObjs:
@@ -155,8 +163,8 @@ def crud_user(request):
         'is_manager':trans.is_manager,
         'is_staff':trans.is_staff,
         'secret_string':trans.secret_string,
-        'auth_token':trans.auth_token
-
+        'auth_token':trans.auth_token,
+        'is_active':trans.active
     })
     obj['status'] = True
     return HttpResponse(json.dumps(obj), content_type='application/json')
@@ -166,7 +174,10 @@ def create_check_user(firstname,lastname,email):
     if email:
         users = CAUsers.objects.filter(email=email)
         if len(users):
-            return users[0]
+            user_old = users[0]
+            user_old.active = True
+            user_old.save()
+            return user_old
         else:
             user_new = CAUsers.objects.create(first_name=firstname,last_name=lastname,email=email)
             user_new.set_password("careerannafirstlogin")
@@ -192,7 +203,7 @@ def login_view_staff(request):
     message = ""
     if auth_token:
         try:
-            user = CAUsers.objects.get(auth_token=auth_token)
+            user = CAUsers.objects.get(auth_token=auth_token,active=True)
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             message = "User Found"
             login(request, user)
@@ -212,7 +223,7 @@ def login_view_staff(request):
             obj['user'] = None
     else:
         try:
-            user = CAUsers.objects.get(email=email)
+            user = CAUsers.objects.get(email=email,active=True)
             if user:
                 user.backend = 'django.contrib.auth.backends.ModelBackend'
                 message = "User Found"
@@ -269,7 +280,7 @@ def send_password_reset(request):
     email = get_param(request, 'email', None)
     randstring = ""
     try:
-        user = CAUsers.objects.get(email=email)
+        user = CAUsers.objects.get(email=email,active=True)
         if user:
                 randstring = user.id + random_str_generator(size=6)
                 # Mailing function to send email to the user
@@ -293,7 +304,7 @@ def reset_pass_staff(request):
     password        = get_param(request, 'pass', None)
     secret_string   = get_param(request, 'sec_string', None)
     try:
-        user = CAUsers.objects.get(secret_string=secret_string)
+        user = CAUsers.objects.get(secret_string=secret_string,active=True)
         user.set_password(password)
         randstring = user.id + random_str_generator(size=6)
         randstring2 = user.id + random_str_generator(size=6)

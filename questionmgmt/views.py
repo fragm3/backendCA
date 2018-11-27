@@ -6,6 +6,9 @@ from models import *
 from overall.views import get_param,cleanstring
 import math
 import json
+import time
+from datetime import datetime
+from testmgmt.models import SectionQuestions
 # Create your views here.
 
 def crud_topics(request):
@@ -18,9 +21,9 @@ def crud_topics(request):
     if operation == "read":
         page_num = get_param(request, 'page_num', None)
         page_size = get_param(request, 'page_size', None)
-        search_id = get_param(request,'search_id',None)    
-        if search_id != None and search_id != "":
-            tranObjs = Topics.objects.filter(id=search_id)
+        data_id = get_param(request,'data_id',None)    
+        if data_id != None and data_id != "":
+            tranObjs = Topics.objects.filter(id=data_id)
         else:
             tranObjs = Topics.objects.all()
             # Filters/Sorting Start
@@ -113,9 +116,9 @@ def crud_folders(request):
         tranObjs = None
         page_num = get_param(request, 'page_num', None)
         page_size = get_param(request, 'page_size', None)
-        search_id = get_param(request,'search_id',None)    
-        if search_id != None and search_id != "":
-            tranObjs = QuestionFolder.objects.filter(id=search_id)
+        data_id = get_param(request,'data_id',None)    
+        if data_id != None and data_id != "":
+            tranObjs = QuestionFolder.objects.filter(id=data_id)
         else:
             tranObjs = QuestionFolder.objects.all()
             # Filters/Sorting Start
@@ -203,9 +206,9 @@ def crud_passages(request):
     if operation == "read":
         page_num = get_param(request, 'page_num', None)
         page_size = get_param(request, 'page_size', None)
-        search_id = get_param(request,'search_id',None)    
-        if search_id != None and search_id != "":
-            tranObjs = Passages.objects.filter(id=search_id)
+        data_id = get_param(request,'data_id',None)    
+        if data_id != None and data_id != "":
+            tranObjs = Passages.objects.filter(id=data_id)
         else:
             tranObjs = Passages.objects.all()
             # Filters/Sorting Start
@@ -230,17 +233,15 @@ def crud_passages(request):
     if operation == "create":
         header      = get_param(request, 'header', None)
         text        = get_param(request, 'text', None)
-        order       = get_param(request, 'order', "1")
         data_dict   = get_param(request, 'data_dict', [])
         if data_dict:
             data_dict = json.loads(data_dict)
-        order        = int(order)
         tranObjs     = Passages.objects.filter(header=header,text=text)
 
         if len(tranObjs):
             obj['message'] = "Passage Already Exists!"
         else:
-            passage = Passages.objects.create(header=header,text=text,order=order,data_table=data_dict)
+            passage = Passages.objects.create(header=header,text=text,data_table=data_dict)
             tranObjs = [passage]
             obj['message'] = "Passage Created"
 
@@ -248,11 +249,9 @@ def crud_passages(request):
         data_id      = get_param(request, 'data_id', None)
         header      = get_param(request, 'header', None)
         text        = get_param(request, 'text', None)
-        order       = get_param(request, 'order', "1")
         data_dict   = get_param(request, 'data_dict', [])
         if data_dict:
             data_dict = json.loads(data_dict)
-        order        = int(order)  
         try:         
             passage = Passages.objects.get(id=data_id)
         except:
@@ -261,7 +260,6 @@ def crud_passages(request):
         if passage:
             passage.header = header
             passage.text = text
-            passage.order = order
             passage.data_table = data_dict
             passage.save()
             tranObjs = [passage]
@@ -280,7 +278,7 @@ def crud_passages(request):
                 print len(questions_linked)
                 if questions_linked:
                     obj['message'] = "Passage Linked To Questions Can't Be Deleted"
-                    # To Be Checked After Question Addions
+                    # To Be Checked After Question Add
                 else:
                     passage.delete()
                     obj['message'] = "Passage Deleted"
@@ -293,10 +291,262 @@ def crud_passages(request):
         'id':trans.id,
         'header':trans.header,
         'text':trans.text,
-        'order':trans.order,
         'data_table':trans.data_table
     })
     obj['status'] = True
     return HttpResponse(json.dumps(obj), content_type='application/json')
 
 
+
+
+
+# Query Correction at deletion pending 
+def crud_questions(request):
+    obj = {}
+    obj['status'] = False
+    obj['result'] = []
+    obj['message'] = "Request Recieved"
+    operation = get_param(request, 'operation', "read")
+    tranObjs = []
+    if operation == "read":
+        page_num = get_param(request, 'page_num', None)
+        page_size = get_param(request, 'page_size', None)
+        data_id = get_param(request,'data_id',None)    
+        if data_id != None and data_id != "":
+            tranObjs = Questions.objects.filter(id=data_id)
+        else:
+            tranObjs = Questions.objects.all()
+            # Filters/Sorting Start
+        
+            # Filters/Sorting End
+        # pagination variable
+        num_pages = 1
+        total_records = tranObjs.count()    
+        if page_num != None and page_num != "":
+            page_num = int(page_num)
+            tranObjs = Paginator(tranObjs, int(page_size))
+            try:
+                tranObjs = tranObjs.page(page_num)
+            except:
+                tranObjs = tranObjs
+            num_pages = int(math.ceil(total_records / float(int(page_size))))
+        # data = list(tranObjs)
+        obj['message'] = "Success"
+        obj['num_pages'] = num_pages
+        obj['total_records'] = total_records
+
+    if operation == "create":  
+        question_text           = get_param(request, 'question_text', None)
+        question_type           = get_param(request, 'question_type', None)
+        topic_id                = get_param(request, 'topic_id', None)
+        total_num_set_answers   = get_param(request, 'num_set', 1)
+        difficulty_user         = get_param(request, 'difficulty', None)
+        to_evaluate             = get_param(request, 'to_evaluate', "1")
+        is_passage              = get_param(request, 'is_passage', "1")
+        passage_id              = get_param(request, 'passage_id', None)
+        answer_options          = get_param(request,'option_dict',None)
+        correct_answer          = get_param(request,'correct_dict',None)
+        is_random_order         = get_param(request,'is_random',"0")
+        question_folder         = get_param(request,'folder_id',None)
+
+        tranObjs     = Questions.objects.filter(question_text=question_text,question_type=question_type)
+        if len(tranObjs):
+            obj['message'] = "Question Already Exists!"
+        else:
+            try:
+                topic = Topics.objects.get(id=topic_id)
+            except:
+                topic = None
+                
+            if is_passage == "1":
+                is_passage = True
+            else:
+                is_passage = False
+
+            if to_evaluate == "1":
+                to_evaluate = True
+            else:
+                to_evaluate = False
+
+            if is_random_order == "1":
+                is_random_order = True
+            else:
+                is_random_order = False
+
+
+            if is_passage:
+                passage = Passages.objects.get(id=passage_id)
+            else:
+                passage = None
+            user = request.user
+            try:
+                folder = QuestionFolder.objects.get(id=question_folder)
+            except:
+                folder = None
+
+
+            ts = time.time()
+            created_at = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+            answer_options = json.loads(answer_options)
+            correct_answer = json.loads(correct_answer)            
+            question = Questions.objects.create(
+                question_text            = question_text,
+                question_type            = question_type,
+                topic                    = topic,
+                total_num_set_answers    = total_num_set_answers,
+                difficulty_user          = difficulty_user,
+                to_evaluate              = to_evaluate,
+                is_passage               = is_passage,
+                passage                  = passage,
+                answer_options           = answer_options,
+                correct_answer           = correct_answer,
+                is_random_order          = is_random_order,
+                created_at               = created_at,
+                modified_at              = created_at,
+                created_by               = user,
+                question_folder          = folder,
+            )
+            tranObjs = [question]
+            obj['message'] = "Question Created"
+
+    if operation == "update":
+        data_id      = get_param(request, 'data_id', None)
+        
+        question_text           = get_param(request, 'question_text', None)
+        question_type           = get_param(request, 'question_type', None)
+        topic_id                = get_param(request, 'topic_id', None)
+        total_num_set_answers   = get_param(request, 'num_set', 1)
+        difficulty_user         = get_param(request, 'difficulty', None)
+        to_evaluate             = get_param(request, 'to_evaluate', True)
+        is_passage              = get_param(request, 'is_passage', True)
+        passage_id              = get_param(request, 'passage_id', True)
+        answer_options          = get_param(request,'option_dict',None)
+        correct_answer          = get_param(request,'correct_dict',None)
+        is_random_order         = get_param(request,'is_random',False)
+        question_folder         = get_param(request,'folder_id',None)
+
+        try:
+            question = Questions.objects.get(id=data_id)
+        except:
+            question = None
+        obj['message'] = "Question Not Found"
+        if question:
+            
+            if is_passage == "1":
+                is_passage = True
+            else:
+                is_passage = False
+
+            if to_evaluate == "1":
+                to_evaluate = True
+            else:
+                to_evaluate = False
+
+            if is_random_order == "1":
+                is_random_order = True
+            else:
+                is_random_order = False
+
+            try:
+                topic = Topics.objects.get(id=topic_id)
+            except:
+                topic = None
+            
+            
+            if is_passage:
+                passage = Passages.objects.get(id=passage_id)
+            else:
+                passage = None
+    
+            ts = time.time()
+            modified_at = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+
+            try:
+                folder = QuestionFolder.objects.get(id=question_folder)
+            except:
+                folder = None            
+            
+            question.question_text            = question_text
+            question.question_type            = question_type
+            question.topic                    = topic
+            question.total_num_set_answers    = total_num_set_answers
+            question.difficulty_user          = difficulty_user
+            question.to_evaluate              = to_evaluate
+            question.is_passage               = is_passage
+            question.passage                  = passage
+            question.answer_options           = json.loads(answer_options)
+            question.correct_answer           = json.loads(correct_answer)
+            question.is_random_order          = is_random_order
+            question.modified_at              = modified_at
+            question.question_folder          = folder
+            question.save()
+            tranObjs = [question]
+            obj['message'] = "Question Updated"
+
+    if operation == "delete":
+        data_id      = get_param(request, 'data_id', None)
+        try:
+            question = Questions.objects.get(id=data_id)
+        except:
+            question = None
+
+        obj['message'] = "Question Not Found"        
+        if question:
+            questions_linked = question.sectionquestions_set.all()
+            try:
+                print len(questions_linked)
+                if questions_linked:
+                    obj['message'] = "Question Linked To Tests Can't Be Deleted"
+                    # To Be Checked After Question Add
+                else:
+                    question.delete()
+                    obj['message'] = "Question Deleted"
+            except:
+                    question.delete()
+                    obj['message'] = "Question Deleted"
+
+    for trans in tranObjs:
+        if trans.passage:
+            passage_out = json.loads(str(trans.passage))
+        else:
+            passage_out = str(trans.passage)
+        
+        if trans.topic:
+            topic_out = json.loads(str(trans.topic))
+        else:
+            topic_out = str(trans.topic)
+
+        if trans.question_folder:
+            folder_out = json.loads(str(trans.question_folder))
+        else:
+            folder_out = str(trans.question_folder)
+
+        if trans.created_by:
+            user_out = json.loads(str(trans.created_by))
+        else:
+            user_out = str(trans.created_by)
+
+
+        obj['result'].append({
+        'id':trans.id,
+        'question_text':trans.question_text,        
+        'question_type':trans.question_type,           
+        # 'topic': serializers.serialize("json", trans.topic),          
+        'topic': topic_out,          
+        'total_num_set_answers':trans.total_num_set_answers,    
+        'difficulty_user':trans.difficulty_user,   
+        'to_evaluate':trans.to_evaluate,  
+        'is_passage':trans.is_passage, 
+        'passage':passage_out,
+        'num_correct_answered':trans.num_correct_answered,
+        'num_total_answered':trans.num_total_answered,
+        'answer_options':trans.answer_options,
+        'correct_answer':trans.correct_answer,
+        'is_random_order':trans.is_random_order,
+        'created_at':str(trans.created_at),
+        'modified_at':str(trans.modified_at),
+        'created_by':user_out,
+        'question_folder':folder_out         
+    })
+    obj['status'] = True
+    return HttpResponse(json.dumps(obj), content_type='application/json')
