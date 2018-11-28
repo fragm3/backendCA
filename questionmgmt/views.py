@@ -555,43 +555,43 @@ def crud_questions(request):
 
 
 
-LOCATION_IMAGE = 'questionmgmt/static/image'
+# LOCATION_IMAGE = 'questionmgmt/static/image'
 
-if settings.PRODUCTION:
-    ADDRESS = 'https://www.ipactesting.com/api/static/'
-else:
-    ADDRESS = 'http://127.0.0.1:8000/static/'
-import uuid
+# if settings.PRODUCTION:
+#     ADDRESS = 'https://www.ipactesting.com/api/static/'
+# else:
+#     ADDRESS = 'http://127.0.0.1:8000/static/'
+# import uuid
 
-def upload_file(request):
-    obj = {}
-    obj['status'] = False
-    obj['results'] = []
-    filetype = get_param(request, 'filetype', None)
-    if filetype:
-        if filetype=='image':
-            if request.method == "POST" and 'file' in request.FILES.keys():
-                obj['status'] = True
-                for afile in request.FILES.getlist('file'):
-                    filename = str(uuid.uuid4())+".jpg"
-                    with open(LOCATION_IMAGE+filename, 'wb+') as destination:
-                        for chunk in afile.chunks():
-                            destination.write(chunk)
-                    obj['results'].append(dict(url=ADDRESS+filename))
-                obj['counter'] = len(obj['results'])
-                obj['msg'] = "Success"
-                return HttpResponse(json.dumps(obj,default=json_util.default), content_type='application/json')
-        elif filetype=='video':
-            if request.method == "POST" and 'file' in request.FILES.keys():
-                obj['status'] = True
-                afile = request.FILES['file']
-                filename = str(uuid.uuid4())+".mp4"
-                with open(LOCATION_IMAGE+filename, 'wb+') as destination:
-                    for chunk in afile.chunks():
-                        destination.write(chunk)
-                    obj['results'].append(dict(url=ADDRESS+filename))
-                obj['counter'] = len(obj['results'])
-                obj['msg'] = "Success"
-                return HttpResponse(json.dumps(obj,default=json_util.default), content_type='application/json')
-    else:
-        return HttpResponseBadRequest("Bad Request")
+# def upload_file(request):
+#     obj = {}
+#     obj['status'] = False
+#     obj['results'] = []
+#     filetype = get_param(request, 'filetype', None)
+#     if filetype:
+#         if filetype=='image':
+#             if request.method == "POST" and 'file' in request.FILES.keys():
+#                 obj['status'] = True
+#                 for afile in request.FILES.getlist('file'):
+#                     filename = str(uuid.uuid4())+".jpg"
+#                     with open(LOCATION_IMAGE+filename, 'wb+') as destination:
+#                         for chunk in afile.chunks():
+#                             destination.write(chunk)
+#                     obj['results'].append(dict(url=ADDRESS+filename))
+#                 obj['counter'] = len(obj['results'])
+#                 obj['msg'] = "Success"
+#                 return HttpResponse(json.dumps(obj,default=json_util.default), content_type='application/json')
+#         elif filetype=='video':
+#             if request.method == "POST" and 'file' in request.FILES.keys():
+#                 obj['status'] = True
+#                 afile = request.FILES['file']
+#                 filename = str(uuid.uuid4())+".mp4"
+#                 with open(LOCATION_IMAGE+filename, 'wb+') as destination:
+#                     for chunk in afile.chunks():
+#                         destination.write(chunk)
+#                     obj['results'].append(dict(url=ADDRESS+filename))
+#                 obj['counter'] = len(obj['results'])
+#                 obj['msg'] = "Success"
+#                 return HttpResponse(json.dumps(obj,default=json_util.default), content_type='application/json')
+#     else:
+#         return HttpResponseBadRequest("Bad Request")
