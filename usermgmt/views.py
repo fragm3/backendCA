@@ -96,7 +96,7 @@ def crud_user(request):
         is_admin         = get_param(request, 'is_admin', "0")
         is_manager       = get_param(request, 'is_manager', "0")
         is_staff         = get_param(request, 'is_staff', "0")
-        is_activate      = get_param(request,'activate',"1")
+        is_activate      = get_param(request,'is_active',"1")
         fname  = fname.lower()
         lname  = lname.lower()
         fname  = cleanstring(fname)
@@ -217,17 +217,21 @@ def login_view_staff(request):
             obj['user']['is_staff'] = user.is_staff
             obj['result']['auth'] = True
             message = "Login Success!"
+            print 1
         except:
             obj['result']['auth'] = False
             message = "Auth Token Expired"
             obj['user'] = None
+            print 2
     else:
         try:
             user = CAUsers.objects.get(email=email,active=True)
             if user:
+                print 3
                 user.backend = 'django.contrib.auth.backends.ModelBackend'
                 message = "User Found"
                 if user.check_password(password):
+                    print 4
                     login(request, user)
                     new_string = user.id + random_str_generator()
                     user.auth_token = new_string
@@ -243,6 +247,7 @@ def login_view_staff(request):
                     message = "Login Success!"
                     user.save()
                 elif user.secret_string == secret_string:
+                    print 5
                     login(request, user)
                     new_string = user.id + random_str_generator()
                     user.auth_token = new_string
@@ -258,14 +263,18 @@ def login_view_staff(request):
                     message = "Login Success!"
                     user.save()
                 else:
+                    print 6
                     message = "Incorrect Password"
                     obj['result']['auth'] = False
             else:
+                print 7
                 message = "User Doesn't exist"
                 obj['result']['auth'] = False
                 obj['user'] = None
         except CAUsers.DoesNotExist:
+            print 8
             if email:
+                print 9
                 message = "User Doesn't exist"
             obj['result']['auth'] = False
             obj['user'] = None
@@ -282,6 +291,7 @@ def send_password_reset(request):
     try:
         user = CAUsers.objects.get(email=email,active=True)
         if user:
+                print 1
                 randstring = user.id + random_str_generator(size=6)
                 # Mailing function to send email to the user
                 message = "Reset Request Success"
