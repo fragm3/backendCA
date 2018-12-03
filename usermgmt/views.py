@@ -2,6 +2,8 @@ from django.shortcuts import render
 from overall.views import cleanstring,get_param,random_str_generator
 from django.http import HttpResponseRedirect,HttpResponseForbidden,HttpResponse
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Q
+
 from django.core.paginator import Paginator
 from models import CAUsers
 from mailing import views as mailing
@@ -15,23 +17,36 @@ def crud_user(request):
     obj['status'] = False
     obj['result'] = []
     obj['message'] = "Request Recieved"
+    obj['filter'] = {}
     tranObjs = []
     operation = get_param(request, 'operation', "read")
     if operation == "read":
         tranObjs = None
         page_num = get_param(request, 'page_num', None)
         page_size = get_param(request, 'page_size', None)
-        search_id = get_param(request,'search_id',None)    
+        search_id = get_param(request,'data_id',None)    
+        usertype = get_param(request,'user_type',None) 
+        search = get_param(request,'search',None)    
         if search_id != None and search_id != "":
             tranObjs = CAUsers.objects.filter(id=search_id)
         else:
             tranObjs = CAUsers.objects.all()
             # Filters/Sorting Start
-        
+            if usertype !=None and usertype !="":
+                if usertype == "admin":
+                    tranObjs = tranObjs.filter(is_admin=True)
+                elif usertype == "manager":
+                    tranObjs = tranObjs.filter(is_manager=True)
+                elif usertype == "staff":
+                    tranObjs = tranObjs.filter(is_staff=True)
+                else:
+                    tranObjs = tranObjs
+            if search !=None and search !="":
+                tranObjs = tranObjs.filter(Q(first_name__icontains=search) | Q(last_name__icontains=search) | Q(email__icontains=search))
             # Filters/Sorting End
         # pagination variable
         num_pages = 1
-        total_records = tranObjs.count()    
+        total_records = len(tranObjs)
         if page_num != None and page_num != "":
             page_num = int(page_num)
             tranObjs = Paginator(tranObjs, int(page_size))
@@ -44,9 +59,11 @@ def crud_user(request):
         obj['message'] = "Success"
         obj['num_pages'] = num_pages
         obj['total_records'] = total_records
-
+        # filter list defining
+        obj['filter']['user_type'] = [{'id':'staff','label':'Staff'},
+                                      {'id':'manager','label':'Manager'},
+                                      {'id':'admin','label':'Admin'}]
     if operation == "create":
-
         fname            = get_param(request, 'fname', None)
         lname            = get_param(request, 'lname', None)
         email            = get_param(request, 'email', None)
@@ -199,7 +216,8 @@ def login_view_staff(request):
         email = email.lower()
         email = cleanstring(email)
     obj['result'] = {}
-    obj['user'] = {}
+    obj['result']['user'] = {}
+    # obj['user'] = {}
     message = ""
     if auth_token:
         try:
@@ -207,21 +225,21 @@ def login_view_staff(request):
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             message = "User Found"
             login(request, user)
-            obj['user']['auth_token'] = auth_token
-            obj['user']['id'] = user.id
-            obj['user']['first_name'] = user.first_name
-            obj['user']['last_name'] = user.last_name
-            obj['user']['email'] = user.email
-            obj['user']['is_admin'] = user.is_admin
-            obj['user']['is_manager'] = user.is_manager
-            obj['user']['is_staff'] = user.is_staff
+            obj['result']['user']['auth_token'] = auth_token
+            obj['result']['user']['id'] = user.id
+            obj['result']['user']['first_name'] = user.first_name
+            obj['result']['user']['last_name'] = user.last_name
+            obj['result']['user']['email'] = user.email
+            obj['result']['user']['is_admin'] = user.is_admin
+            obj['result']['user']['is_manager'] = user.is_manager
+            obj['result']['user']['is_staff'] = user.is_staff
             obj['result']['auth'] = True
             message = "Login Success!"
             print 1
         except:
             obj['result']['auth'] = False
             message = "Auth Token Expired"
-            obj['user'] = None
+            obj['result']['user'] = None
             print 2
     else:
         try:
@@ -235,14 +253,14 @@ def login_view_staff(request):
                     login(request, user)
                     new_string = user.id + random_str_generator()
                     user.auth_token = new_string
-                    obj['user']['auth_token'] = new_string
-                    obj['user']['id'] = user.id
-                    obj['user']['first_name'] = user.first_name
-                    obj['user']['last_name'] = user.last_name
-                    obj['user']['email'] = user.email
-                    obj['user']['is_admin'] = user.is_admin
-                    obj['user']['is_manager'] = user.is_manager
-                    obj['user']['is_staff'] = user.is_staff
+                    obj['result']['user']['auth_token'] = new_string
+                    obj['result']['user']['id'] = user.id
+                    obj['result']['user']['first_name'] = user.first_name
+                    obj['result']['user']['last_name'] = user.last_name
+                    obj['result']['user']['email'] = user.email
+                    obj['result']['user']['is_admin'] = user.is_admin
+                    obj['result']['user']['is_manager'] = user.is_manager
+                    obj['result']['user']['is_staff'] = user.is_staff
                     obj['result']['auth'] = True
                     message = "Login Success!"
                     user.save()
@@ -251,14 +269,14 @@ def login_view_staff(request):
                     login(request, user)
                     new_string = user.id + random_str_generator()
                     user.auth_token = new_string
-                    obj['user']['auth_token'] = new_string
-                    obj['user']['id'] = user.id
-                    obj['user']['first_name'] = user.first_name
-                    obj['user']['last_name'] = user.last_name
-                    obj['user']['email'] = user.email
-                    obj['user']['is_admin'] = user.is_admin
-                    obj['user']['is_manager'] = user.is_manager
-                    obj['user']['is_staff'] = user.is_staff
+                    obj['result']['user']['auth_token'] = new_string
+                    obj['result']['user']['id'] = user.id
+                    obj['result']['user']['first_name'] = user.first_name
+                    obj['result']['user']['last_name'] = user.last_name
+                    obj['result']['user']['email'] = user.email
+                    obj['result']['user']['is_admin'] = user.is_admin
+                    obj['result']['user']['is_manager'] = user.is_manager
+                    obj['result']['user']['is_staff'] = user.is_staff
                     obj['result']['auth'] = True
                     message = "Login Success!"
                     user.save()
@@ -270,14 +288,14 @@ def login_view_staff(request):
                 print 7
                 message = "User Doesn't exist"
                 obj['result']['auth'] = False
-                obj['user'] = None
-        except CAUsers.DoesNotExist:
+                obj['result']['user'] = None
+        except:
             print 8
             if email:
                 print 9
                 message = "User Doesn't exist"
             obj['result']['auth'] = False
-            obj['user'] = None
+            obj['result']['user'] = None
     obj['status'] = True
     obj['message'] = message
     response = HttpResponse(json.dumps(obj), content_type='application/json')

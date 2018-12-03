@@ -18,6 +18,7 @@ def crud_topics(request):
     obj['status'] = False
     obj['result'] = []
     obj['message'] = "Request Recieved"
+    obj['filter'] = {}
     operation = get_param(request, 'operation', "read")
     tranObjs = []
     if operation == "read":
@@ -112,6 +113,7 @@ def crud_folders(request):
     obj['status'] = False
     obj['result'] = []
     obj['message'] = "Request Recieved"
+    obj['filter'] = {}
     tranObjs = []
     operation = get_param(request, 'operation', "read")
     if operation == "read":
@@ -203,6 +205,7 @@ def crud_passages(request):
     obj['status'] = False
     obj['result'] = []
     obj['message'] = "Request Recieved"
+    obj['filter'] = {}
     operation = get_param(request, 'operation', "read")
     tranObjs = []
     if operation == "read":
@@ -299,15 +302,13 @@ def crud_passages(request):
     return HttpResponse(json.dumps(obj), content_type='application/json')
 
 
-
-
-
 # Query Correction at deletion pending 
 def crud_questions(request):
     obj = {}
     obj['status'] = False
     obj['result'] = []
     obj['message'] = "Request Recieved"
+    obj['filter'] = {}
     operation = get_param(request, 'operation', "read")
     tranObjs = []
     if operation == "read":
