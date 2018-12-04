@@ -27,10 +27,11 @@ def crud_user(request):
         search_id = get_param(request,'data_id',None)    
         usertype = get_param(request,'user_type',None) 
         search = get_param(request,'search',None)    
+        sort_by = get_param(request,'sort_by',None)    
         if search_id != None and search_id != "":
             tranObjs = CAUsers.objects.filter(id=search_id)
         else:
-            tranObjs = CAUsers.objects.all()
+            tranObjs = CAUsers.objects.all().order_by('first_name')
             # Filters/Sorting Start
             if usertype !=None and usertype !="":
                 if usertype == "admin":
@@ -43,6 +44,8 @@ def crud_user(request):
                     tranObjs = tranObjs
             if search !=None and search !="":
                 tranObjs = tranObjs.filter(Q(first_name__icontains=search) | Q(last_name__icontains=search) | Q(email__icontains=search))
+            if sort_by !=None and sort_by !="":
+                tranObjs = tranObjs.order_by(sort_by)
             # Filters/Sorting End
         # pagination variable
         num_pages = 1
@@ -63,6 +66,10 @@ def crud_user(request):
         obj['filter']['user_type'] = [{'id':'staff','label':'Staff'},
                                       {'id':'manager','label':'Manager'},
                                       {'id':'admin','label':'Admin'}]
+        obj['filter']['sort_by'] = [{'id':'first_name','label':'First Name'},
+                                      {'id':'last_name','label':'Last Name'},
+                                      {'id':'email','label':'Email'}]
+
     if operation == "create":
         fname            = get_param(request, 'fname', None)
         lname            = get_param(request, 'lname', None)
