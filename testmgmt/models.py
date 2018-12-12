@@ -44,6 +44,12 @@ from usermgmt.models import CAUsers
     # Topic Wise
 
 # Sectional Categories
+class TestFolder(models.Model):
+    folder_name = models.CharField(max_length=100)
+    description  = models.CharField(max_length=300,null=True)
+    def __str__(self):
+        return json.dumps({'id':self.id,'category':self.folder_name})
+
 
 class Instructions(models.Model):
     instruction = models.CharField(max_length=3000)
@@ -90,6 +96,9 @@ class SectionStructure(models.Model):
 
 class TestFolder(models.Model):
     folder_name = models.CharField(max_length=100)
+    description  = models.CharField(max_length=300,null=True)
+    def __str__(self):
+        return json.dumps({'id':self.id,'category':self.folder_name})
 
 class Tests(TestStructure):
     test_name               = models.CharField(max_length=100)

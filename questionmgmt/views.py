@@ -10,7 +10,8 @@ import json
 import time
 from datetime import datetime
 from testmgmt.models import SectionQuestions
-
+import operator
+# from titlecase import titlecase
 # Create your views here.
 
 def crud_topics(request):
@@ -24,13 +25,27 @@ def crud_topics(request):
     if operation == "read":
         page_num = get_param(request, 'page_num', None)
         page_size = get_param(request, 'page_size', None)
-        data_id = get_param(request,'data_id',None)    
+        data_id = get_param(request,'data_id',None)   
+        search = get_param(request,'search',None) 
+        sort_by = get_param(request,'sort_by',None) 
+        category = get_param(request,'category',None) 
+
         if data_id != None and data_id != "":
             tranObjs = Topics.objects.filter(id=data_id)
         else:
-            tranObjs = Topics.objects.all()
+            tranObjs = Topics.objects.all().order_by('category')
             # Filters/Sorting Start
-        
+
+            if category !=None and category !="":
+                tranObjs = tranObjs.filter(category=category)
+
+            if search !=None and search !="":
+                tranObjs = tranObjs.filter(Q(category__icontains=search) | Q(sub_category__icontains=search) | Q(description__icontains=search))
+            
+            if sort_by !=None and sort_by !="":
+                tranObjs = tranObjs.order_by(sort_by)
+
+
             # Filters/Sorting End
         # pagination variable
         num_pages = 1
@@ -48,13 +63,28 @@ def crud_topics(request):
         obj['num_pages'] = num_pages
         obj['total_records'] = total_records
 
+        category_list = Topics.objects.all()
+        obj['filter']['category'] = []
+        for item in category_list:
+            obj['filter']['category'].append({
+                'id':item.category,
+                'label':(item.category).title()
+                })
+        obj['filter']['category'] = {v['id']:v for v in obj['filter']['category']}.values()
+        obj['filter']['category'] = sorted(obj['filter']['category'], key=operator.itemgetter('id'))
+
+        obj['filter']['sort_by'] = [{'id':'category','label':'Category'},
+                                    {'id':'sub_category','label':'Sub Category'},
+                                    {'id':'description','label':'Description'}]
+
+
     if operation == "create":
         category     = get_param(request, 'category', None)
         sub_category = get_param(request, 'subcategory', None)
         description  = get_param(request,'desc',None)
         category     = cleanstring(category).lower()
         sub_category = cleanstring(sub_category).lower()
-        description  = cleanstring(description).lower()
+        description  = cleanstring(description)
         tranObjs     = Topics.objects.filter(category=category,sub_category=sub_category)
 
         if len(tranObjs):
@@ -323,13 +353,24 @@ def crud_questions(request):
     if operation == "read":
         page_num = get_param(request, 'page_num', None)
         page_size = get_param(request, 'page_size', None)
-        data_id = get_param(request,'data_id',None)    
+        data_id = get_param(request,'data_id',None)   
+        folder_id = get_param(request,'folder_id',None)    
+        search = get_param(request,'search',None)    
+        sort_by = get_param(request,'sort_by',None)    
         if data_id != None and data_id != "":
             tranObjs = Questions.objects.filter(id=data_id)
         else:
             tranObjs = Questions.objects.all()
             # Filters/Sorting Start
-        
+            if search !=None and search !="":
+                tranObjs = tranObjs.filter(question_text__icontains=search)
+            
+            if sort_by !=None and  sort_by !="":
+                tranObjs = tranObjs.order_by(sort_by)
+
+            if folder_id !=None and  folder_id !="":
+                tranObjs = tranObjs.filter(question_folder__id = folder_id)
+
             # Filters/Sorting End
         # pagination variable
         num_pages = 1
@@ -346,6 +387,50 @@ def crud_questions(request):
         obj['message'] = "Success"
         obj['num_pages'] = num_pages
         obj['total_records'] = total_records
+        obj['filter']['sort_by'] = [
+                                    {'id':'question_type','label':'Question Type'},
+                                    {'id':'topic','label':'Topic'},
+                                    {'id':'difficulty_user','label':'Difficulty'},
+                                    {'id':'created_at','label':'Created At'},
+                                    {'id':'modified_at','label':'Modified At'},
+                                    ]
+        obj['filter']['question_type'] = [
+                                    {'id':'mcq_single','label':'MCQ Single'},
+                                    {'id':'mcq_multiple','label':'MCQ Multiple'},
+                                    {'id':'word','label':'Word'},
+                                    {'id':'number','label':'Number'},
+                                    {'id':'essay','label':'Essay'},
+                                    {'id':'chooseorder','label':'Choose Order'},
+                                    {'id':'in_question_drop_down','label':'In Question Drop Down'},
+                                    {'id':'in_question_word','label':'In Question Word'},
+                                    {'id':'in_question_number','label':'In Question Number'},                                                                    
+                                    ]
+
+        obj['filter']['difficulty'] = [
+                                    {'id':'1','label':'One'},
+                                    {'id':'2','label':'Two'},
+                                    {'id':'3','label':'Three'},
+                                    {'id':'4','label':'Four'},
+                                    {'id':'5','label':'Five'},
+                                    {'id':'6','label':'Six'},
+                                    ]
+
+        obj['filter']['is_passage'] = [
+                                    {'id':'0','label':'No'},
+                                    {'id':'1','label':'Yes'},
+                                    ]
+
+        obj['filter']['is_passage'] = [
+                                    {'id':'0','label':'No'},
+                                    {'id':'1','label':'Yes'},
+                                    ]
+    # Topic
+        obj['filter']['topic'] = [
+                                    {'id':'0','label':'No'},
+                                    {'id':'1','label':'Yes'},
+                                    ]
+
+
 
     if operation == "create":  
         question_text           = get_param(request, 'question_text', None)
