@@ -28,6 +28,7 @@ def crud_user(request):
         usertype = get_param(request,'user_type',None) 
         search = get_param(request,'search',None)    
         sort_by = get_param(request,'sort_by',None)    
+        order = get_param(request,'order_by',"asc")    
         if search_id != None and search_id != "":
             tranObjs = CAUsers.objects.filter(id=search_id)
         else:
@@ -55,7 +56,10 @@ def crud_user(request):
             if search !=None and search !="":
                 tranObjs = tranObjs.filter(Q(first_name__icontains=search) | Q(last_name__icontains=search) | Q(email__icontains=search))
             if sort_by !=None and sort_by !="":
-                tranObjs = tranObjs.order_by(sort_by)
+                if order == "asc":
+                    tranObjs = tranObjs.order_by(sort_by)
+                else:
+                    tranObjs = tranObjs.order_by("-" + sort_by)
             # Filters/Sorting End
         # pagination variable
         num_pages = 1
@@ -79,6 +83,9 @@ def crud_user(request):
         obj['filter']['sort_by'] = [{'id':'first_name','label':'First Name'},
                                       {'id':'last_name','label':'Last Name'},
                                       {'id':'email','label':'Email'}]
+        obj['filter']['order_by'] = [{'id':'asc','label':'Ascending'},
+                                      {'id':'desc','label':'Descending'}]
+
 
     if operation == "create":
         fname            = get_param(request, 'fname', None)
