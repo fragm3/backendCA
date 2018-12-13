@@ -34,14 +34,24 @@ def crud_user(request):
             tranObjs = CAUsers.objects.all().order_by('first_name')
             # Filters/Sorting Start
             if usertype !=None and usertype !="":
-                if usertype == "admin":
-                    tranObjs = tranObjs.filter(is_admin=True)
-                elif usertype == "manager":
-                    tranObjs = tranObjs.filter(is_manager=True)
-                elif usertype == "staff":
+                usertype_list = usertype.split(",")
+                print usertype_list
+                if "staff" in usertype_list:
                     tranObjs = tranObjs.filter(is_staff=True)
+                    # if "manager" in usertype_list:
+                    #     tranObjs = tranObjs.filter(is_manager=True)                        
+                    #     if "admin" in usertype_list:
+                    #         tranObjs = tranObjs.filter(is_admin=True)                        
+                elif "manager" in usertype_list:
+                    print "here"
+                    tranObjs = tranObjs.filter(is_manager=True)                        
+                    # if "admin" in usertype_list:
+                    #     tranObjs = tranObjs.filter(is_admin=True)                        
+                elif "admin" in usertype_list:
+                    tranObjs = tranObjs.filter(is_admin=True)                                            
                 else:
                     tranObjs = tranObjs
+                    
             if search !=None and search !="":
                 tranObjs = tranObjs.filter(Q(first_name__icontains=search) | Q(last_name__icontains=search) | Q(email__icontains=search))
             if sort_by !=None and sort_by !="":
@@ -325,7 +335,7 @@ def send_password_reset(request):
                 mailing.send_password_reset_email(name=user.first_name, email=user.email, secret_string=randstring.encode('utf-8'))
         else:
             message = "User Doesn't exist"
-    except CAUsers.DoesNotExist:
+    except:
         message = "User Doesn't exist"
         obj['user'] = None
     obj['status'] = True
