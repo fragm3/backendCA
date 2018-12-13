@@ -30,7 +30,9 @@ def crud_testfolders(request):
         page_size = get_param(request, 'page_size', None)
         data_id = get_param(request,'data_id',None)    
         search = get_param(request,'search',None) 
-        sort_by = get_param(request,'sort_by',None)    
+        sort_by = get_param(request,'sort_by',None)
+        order = get_param(request,'order_by',None)    
+    
         if data_id != None and data_id != "":
             tranObjs = TestFolder.objects.filter(id=data_id)
         else:
@@ -40,7 +42,11 @@ def crud_testfolders(request):
                 tranObjs = tranObjs.filter(Q(folder_name__icontains=search) | Q(description__icontains=search))
             
             if sort_by !=None and sort_by !="":
-                tranObjs = tranObjs.order_by(sort_by)
+                if order == "asc":
+                    tranObjs = tranObjs.order_by(sort_by)
+                else:
+                    tranObjs = tranObjs.order_by("-" + sort_by)
+
             # Filters/Sorting End
         # pagination variable
         num_pages = 1
@@ -59,6 +65,9 @@ def crud_testfolders(request):
         obj['total_records'] = total_records
         obj['filter']['sort_by'] = [{'id':'folder_name','label':'Folder Name'},
                                     {'id':'description','label':'Description'}]
+        obj['filter']['order_by'] = [{'id':'asc','label':'Ascending'},
+                                    {'id':'desc','label':'Descending'}]
+
 
 
 
