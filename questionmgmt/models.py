@@ -32,6 +32,7 @@ class QuestionStructure(models.Model):
     question_text            = models.CharField(max_length=500)
     question_type            = models.CharField(max_length=50)
     # mcq_single, mcq_multiple, word, number, essay, chooseorder, in_question_drop_down, in_question_word, in_question_number
+    solution                 = models.CharField(max_length=500)
     topic                    = models.ForeignKey(Topics,
                                 on_delete=models.SET_NULL,
                                 null=True)

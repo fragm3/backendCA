@@ -14,6 +14,11 @@ import operator
 # from titlecase import titlecase
 # Create your views here.
 
+# S3 Bucket Credentials 
+
+
+
+
 def crud_topics(request):
     obj = {}
     obj['status'] = False
@@ -435,6 +440,7 @@ def crud_questions(request):
     if operation == "create":  
         question_text           = get_param(request, 'question_text', None)
         question_type           = get_param(request, 'question_type', None)
+        solution                = get_param(request, 'solution', None)
         topic_id                = get_param(request, 'topic_id', None)
         total_num_set_answers   = get_param(request, 'num_set', 1)
         difficulty_user         = get_param(request, 'difficulty', None)
@@ -493,6 +499,7 @@ def crud_questions(request):
                 total_num_set_answers    = total_num_set_answers,
                 difficulty_user          = difficulty_user,
                 to_evaluate              = to_evaluate,
+                solution                 = solution,
                 is_passage               = is_passage,
                 passage                  = passage,
                 answer_options           = answer_options,
@@ -507,8 +514,7 @@ def crud_questions(request):
             obj['message'] = "Question Created"
 
     if operation == "update":
-        data_id      = get_param(request, 'data_id', None)
-        
+        data_id                 = get_param(request, 'data_id', None)
         question_text           = get_param(request, 'question_text', None)
         question_type           = get_param(request, 'question_type', None)
         topic_id                = get_param(request, 'topic_id', None)
@@ -516,6 +522,7 @@ def crud_questions(request):
         difficulty_user         = get_param(request, 'difficulty', None)
         to_evaluate             = get_param(request, 'to_evaluate', True)
         is_passage              = get_param(request, 'is_passage', True)
+        solution                = get_param(request, 'solution', None)
         passage_id              = get_param(request, 'passage_id', True)
         answer_options          = get_param(request,'option_dict',None)
         correct_answer          = get_param(request,'correct_dict',None)
@@ -570,6 +577,7 @@ def crud_questions(request):
             question.difficulty_user          = difficulty_user
             question.to_evaluate              = to_evaluate
             question.is_passage               = is_passage
+            question.solution                 = solution
             question.passage                  = passage
             question.answer_options           = json.loads(answer_options)
             question.correct_answer           = json.loads(correct_answer)
@@ -633,6 +641,7 @@ def crud_questions(request):
         'total_num_set_answers':trans.total_num_set_answers,    
         'difficulty_user':trans.difficulty_user,   
         'to_evaluate':trans.to_evaluate,  
+        'solution':trans.solution,  
         'is_passage':trans.is_passage, 
         'passage':passage_out,
         'num_correct_answered':trans.num_correct_answered,
@@ -647,6 +656,7 @@ def crud_questions(request):
     })
     obj['status'] = True
     return HttpResponse(json.dumps(obj), content_type='application/json')
+
 
 
 
@@ -690,3 +700,82 @@ def crud_questions(request):
 #                 return HttpResponse(json.dumps(obj,default=json_util.default), content_type='application/json')
 #     else:
 #         return HttpResponseBadRequest("Bad Request")
+
+
+
+import requests
+
+cookies = {
+    '_ga': 'GA1.2.1180746591.1535354636',
+    '__auc': 'e202327f1657a448946879cce2c',
+    '__zlcmid': 'oLhdM2VSo2Mez6',
+    'ci_session': 'if3p0ubaedriupff4ee3iveb4uqo7f6d',
+    '_gid': 'GA1.2.1865445320.1544703551',
+    '__asc': '82b6b882167a781a753bec6961a',
+    '_fbp': 'fb.1.1544703552081.48840516',
+    '_gat': '1',
+    '_gat_gtag_UA_121888397_1': '1',
+}
+
+headers = {
+    'Pragma': 'no-cache',
+    'Origin': 'https://www.careeranna.com',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53',
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'Accept': '*/*',
+    'Cache-Control': 'no-cache',
+    'X-Requested-With': 'XMLHttpRequest',
+    'Connection': 'keep-alive',
+    'Referer': 'https://www.careeranna.com/free-tests',
+}
+
+data = {
+  'phoneNumber': '1234567890',
+  'emailUser': 'dahsdiha@hdhsiuahd.com',
+  'testSlugId': 'https://www.careeranna.com/test_admin/test/test_instruction/all-india-free-cat-2018-mock-test',
+  'sourceReg': 'Free Test'
+}
+
+response = requests.post('https://www.careeranna.com//cuser/take_test_details', headers=headers, cookies=cookies, data=data)
+
+
+
+import requests
+
+cookies = {
+    '_ga': 'GA1.2.1180746591.1535354636',
+    '__auc': 'e202327f1657a448946879cce2c',
+    '__zlcmid': 'oLhdM2VSo2Mez6',
+    'ci_session': 'if3p0ubaedriupff4ee3iveb4uqo7f6d',
+    '_gid': 'GA1.2.1865445320.1544703551',
+    '__asc': '82b6b882167a781a753bec6961a',
+    '_fbp': 'fb.1.1544703552081.48840516',
+    '_gat': '1',
+    '_gat_gtag_UA_121888397_1': '1',
+}
+
+headers = {
+    'Pragma': 'no-cache',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
+    'Accept': 'application/json, text/javascript, */*; q=0.01',
+    'Referer': 'https://www.careeranna.com/test_admin/test/startGroupedTest/all-india-free-cat-2018-mock-test/dahsdiha@hdhsiuahd.com',
+    'X-Requested-With': 'XMLHttpRequest',
+    'Connection': 'keep-alive',
+    'Cache-Control': 'no-cache',
+}
+
+params = (
+    ('mode', 'test'),
+    ('answerpaper_slug', '49157'),
+)
+
+response = requests.get('https://www.careeranna.com/test_admin/test/testStart/cat-2018-varc-02/', headers=headers, params=params, cookies=cookies)
+
+#NB. Original query string below. It seems impossible to parse and
+#reproduce query strings 100% accurately so the one below is given
+#in case the reproduced version is not "correct".
+# response = requests.get('https://www.careeranna.com/test_admin/test/testStart/cat-2018-varc-02/?mode=test&answerpaper_slug=49157', headers=headers, cookies=cookies)
