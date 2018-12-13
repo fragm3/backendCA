@@ -12,6 +12,9 @@ import time
 from datetime import datetime
 import operator
 
+# Slack Integration Check
+
+
 # Create your views here.
 def crud_testfolders(request):
     obj = {}
