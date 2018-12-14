@@ -58,7 +58,7 @@ def random_str_generator(size=6, chars=string.ascii_uppercase + string.digits):
 def upload_file(request):
     obj = {}
     obj['status'] = False
-    obj['results'] = []
+    obj['result'] = []
     obj['message'] = "Request Recieved!"
     filetype = get_param(request, 'filetype', None)
     if request.user.is_authenticated and request.user.is_staff:
@@ -90,7 +90,7 @@ def upload_file(request):
                 else:
                     user_out = str(fileupload.created_by)
 
-                obj['results'].append(
+                obj['result'].append(
                    {'initial_file_name':fileupload.initial_file_name,
                     'final_file_name':fileupload.final_file_name,
                     'file_path':fileupload.file_path,
