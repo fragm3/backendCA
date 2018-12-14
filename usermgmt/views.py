@@ -34,7 +34,7 @@ def crud_user(request):
         else:
             tranObjs = CAUsers.objects.all().order_by('first_name')
             # Filters/Sorting Start
-            if usertype !=None and usertype !="":
+            if usertype !=None and usertype !="" and usertype !="none":
                 usertype_list = usertype.split(",")
                 print usertype_list
                 if "staff" in usertype_list:
@@ -55,7 +55,7 @@ def crud_user(request):
                     
             if search !=None and search !="":
                 tranObjs = tranObjs.filter(Q(first_name__icontains=search) | Q(last_name__icontains=search) | Q(email__icontains=search))
-            if sort_by !=None and sort_by !="":
+            if sort_by !=None and sort_by !="" and sort_by != "none":
                 if order == "asc":
                     tranObjs = tranObjs.order_by(sort_by)
                 else:

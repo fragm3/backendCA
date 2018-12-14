@@ -41,7 +41,7 @@ def crud_testfolders(request):
             if search !=None and search !="":
                 tranObjs = tranObjs.filter(Q(folder_name__icontains=search) | Q(description__icontains=search))
             
-            if sort_by !=None and sort_by !="":
+            if sort_by !=None and sort_by !="" and sort_by != "none":
                 if order == "asc":
                     tranObjs = tranObjs.order_by(sort_by)
                 else:

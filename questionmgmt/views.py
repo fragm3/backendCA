@@ -40,13 +40,13 @@ def crud_topics(request):
             tranObjs = Topics.objects.all().order_by('category')
             # Filters/Sorting Start
 
-            if category !=None and category !="":
+            if category !=None and category !="" and category != "none":
                 tranObjs = tranObjs.filter(category=category)
 
             if search !=None and search !="":
                 tranObjs = tranObjs.filter(Q(category__icontains=search) | Q(sub_category__icontains=search) | Q(description__icontains=search))
             
-            if sort_by !=None and sort_by !="":
+            if sort_by !=None and sort_by !="" and sort_by !="none":
                 if order == "asc":
                         tranObjs = tranObjs.order_by(sort_by)
                 else:
@@ -173,7 +173,7 @@ def crud_folders(request):
             if search !=None and search !="":
                 tranObjs = tranObjs.filter(Q(folder_name__icontains=search) | Q(description__icontains=search))
             
-            if sort_by !=None and sort_by !="":
+            if sort_by !=None and sort_by !="" and sort_by != "none":
                 if order == "asc":
                     tranObjs = tranObjs.order_by(sort_by)
                 else:
@@ -385,13 +385,13 @@ def crud_questions(request):
             if search !=None and search !="":
                 tranObjs = tranObjs.filter(question_text__icontains=search)
             
-            if sort_by !=None and sort_by !="":
+            if sort_by !=None and sort_by !="" and sort_by != "none":
                 if order == "asc":
                     tranObjs = tranObjs.order_by(sort_by)
                 else:
                     tranObjs = tranObjs.order_by("-" + sort_by)
 
-            if folder_id !=None and  folder_id !="":
+            if folder_id !=None and  folder_id !="" and folder_id != "none":
                 tranObjs = tranObjs.filter(question_folder__id = folder_id)
 
             # Filters/Sorting End
