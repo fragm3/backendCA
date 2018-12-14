@@ -77,8 +77,8 @@ def upload_file(request):
                 s3.Object(bucket_name, 'images/' + final_filename).put(Body=open('filename.data', 'rb'))
                 filepath = "https://s3.amazonaws.com/"+bucket_name+"/images/"+final_filename
                 fileupload = FileUpload.objects.create(initial_file_name = given_filename,
-                                                        final_file_name  = filepath,
-                                                        file_path        = "adsad",
+                                                        final_file_name  = final_filename,
+                                                        file_path        = filepath,
                                                         uploaded_at      = created_at,
                                                         file_type        = "image",
                                                         created_by       = request.user
