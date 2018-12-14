@@ -31,8 +31,6 @@ TEMPLATE_DEBUG = True
 ALLOWED_HOSTS = []
 
 
-
-
 # Application definition
 
 INSTALLED_APPS = (
@@ -46,7 +44,7 @@ INSTALLED_APPS = (
     'questionmgmt',
     'usermgmt',
     'overall',
-    'mailing'
+    'mailing',
 
 )
 
@@ -59,6 +57,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'overall.middleware.corsMiddleware',
     'overall.disable.DisableCSRF',
+    
 )
 
 AUTH_USER_MODEL = 'usermgmt.CAUsers'

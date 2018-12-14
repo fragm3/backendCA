@@ -11,10 +11,8 @@ import time
 from datetime import datetime
 from testmgmt.models import SectionQuestions
 import operator
-# from titlecase import titlecase
-# Create your views here.
 
-# S3 Bucket Credentials 
+# Create your views here.
 
 
 
@@ -672,7 +670,63 @@ def crud_questions(request):
 
 
 
-# LOCATION_IMAGE = 'questionmgmt/static/image'
+
+# import boto3
+# import base64
+
+# def upload_file(request):
+#     obj = {}
+#     obj['status'] = False
+#     obj['results'] = []
+#     filetype = get_param(request, 'filetype', None)
+#     bucket_name = "careeranna-media-bucket"
+#     if filetype:
+#         if filetype=='image':
+#             obj['status'] = True
+#             file = request.FILES["file"]
+#             obj['filename'] = request.FILES["file"].name
+#             destination = open('filename.data', 'wb')
+#             for chunk in file.chunks():
+#                 destination.write(chunk)
+#             destination.close()
+#             s3 = boto3.resource('s3')
+#             s3.Object(bucket_name, 'images/test.jpg').put(Body=open('filename.data', 'rb'))
+#             return HttpResponse(json.dumps(obj), content_type='application/json')
+
+
+
+
+
+
+
+
+
+
+# import boto3
+
+# some_binary_data = b'Here we have some data'
+# more_binary_data = b'Here we have some more data'
+
+# # Method 1: Object.put()
+# s3 = boto3.resource('s3')
+# object = s3.Object('my_bucket_name', 'my/key/including/filename.txt')
+# object.put(Body=some_binary_data)
+
+# # Method 2: Client.put_object()
+# client = boto3.client('s3')
+# client.put_object(Body=more_binary_data, Bucket='my_bucket_name', Key='my/key/including/anotherfilename.txt')
+
+
+
+
+
+
+
+
+
+
+
+# LOCATION_IMAGE = 'questionmgmt/static/images'
 
 # if settings.PRODUCTION:
 #     ADDRESS = 'https://www.ipactesting.com/api/static/'
@@ -715,77 +769,80 @@ def crud_questions(request):
 
 
 
-import requests
+# import requests
 
-cookies = {
-    '_ga': 'GA1.2.1180746591.1535354636',
-    '__auc': 'e202327f1657a448946879cce2c',
-    '__zlcmid': 'oLhdM2VSo2Mez6',
-    'ci_session': 'if3p0ubaedriupff4ee3iveb4uqo7f6d',
-    '_gid': 'GA1.2.1865445320.1544703551',
-    '__asc': '82b6b882167a781a753bec6961a',
-    '_fbp': 'fb.1.1544703552081.48840516',
-    '_gat': '1',
-    '_gat_gtag_UA_121888397_1': '1',
-}
+# cookies = {
+#     '_ga': 'GA1.2.1180746591.1535354636',
+#     '__auc': 'e202327f1657a448946879cce2c',
+#     '__zlcmid': 'oLhdM2VSo2Mez6',
+#     'ci_session': 'if3p0ubaedriupff4ee3iveb4uqo7f6d',
+#     '_gid': 'GA1.2.1865445320.1544703551',
+#     '__asc': '82b6b882167a781a753bec6961a',
+#     '_fbp': 'fb.1.1544703552081.48840516',
+#     '_gat': '1',
+#     '_gat_gtag_UA_121888397_1': '1',
+# }
 
-headers = {
-    'Pragma': 'no-cache',
-    'Origin': 'https://www.careeranna.com',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53',
-    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    'Accept': '*/*',
-    'Cache-Control': 'no-cache',
-    'X-Requested-With': 'XMLHttpRequest',
-    'Connection': 'keep-alive',
-    'Referer': 'https://www.careeranna.com/free-tests',
-}
+# headers = {
+#     'Pragma': 'no-cache',
+#     'Origin': 'https://www.careeranna.com',
+#     'Accept-Encoding': 'gzip, deflate, br',
+#     'Accept-Language': 'en-US,en;q=0.9',
+#     'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53',
+#     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+#     'Accept': '*/*',
+#     'Cache-Control': 'no-cache',
+#     'X-Requested-With': 'XMLHttpRequest',
+#     'Connection': 'keep-alive',
+#     'Referer': 'https://www.careeranna.com/free-tests',
+# }
 
-data = {
-  'phoneNumber': '1234567890',
-  'emailUser': 'dahsdiha@hdhsiuahd.com',
-  'testSlugId': 'https://www.careeranna.com/test_admin/test/test_instruction/all-india-free-cat-2018-mock-test',
-  'sourceReg': 'Free Test'
-}
+# data = {
+#   'phoneNumber': '1234567890',
+#   'emailUser': 'dahsdiha@hdhsiuahd.com',
+#   'testSlugId': 'https://www.careeranna.com/test_admin/test/test_instruction/all-india-free-cat-2018-mock-test',
+#   'sourceReg': 'Free Test'
+# }
 
-response = requests.post('https://www.careeranna.com//cuser/take_test_details', headers=headers, cookies=cookies, data=data)
+# response = requests.post('https://www.careeranna.com//cuser/take_test_details', headers=headers, cookies=cookies, data=data)
 
 
 
-import requests
 
-cookies = {
-    '_ga': 'GA1.2.1180746591.1535354636',
-    '__auc': 'e202327f1657a448946879cce2c',
-    '__zlcmid': 'oLhdM2VSo2Mez6',
-    'ci_session': 'if3p0ubaedriupff4ee3iveb4uqo7f6d',
-    '_gid': 'GA1.2.1865445320.1544703551',
-    '__asc': '82b6b882167a781a753bec6961a',
-    '_fbp': 'fb.1.1544703552081.48840516',
-    '_gat': '1',
-    '_gat_gtag_UA_121888397_1': '1',
-}
 
-headers = {
-    'Pragma': 'no-cache',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
-    'Accept': 'application/json, text/javascript, */*; q=0.01',
-    'Referer': 'https://www.careeranna.com/test_admin/test/startGroupedTest/all-india-free-cat-2018-mock-test/dahsdiha@hdhsiuahd.com',
-    'X-Requested-With': 'XMLHttpRequest',
-    'Connection': 'keep-alive',
-    'Cache-Control': 'no-cache',
-}
 
-params = (
-    ('mode', 'test'),
-    ('answerpaper_slug', '49157'),
-)
+# import requests
 
-response = requests.get('https://www.careeranna.com/test_admin/test/testStart/cat-2018-varc-02/', headers=headers, params=params, cookies=cookies)
+# cookies = {
+#     '_ga': 'GA1.2.1180746591.1535354636',
+#     '__auc': 'e202327f1657a448946879cce2c',
+#     '__zlcmid': 'oLhdM2VSo2Mez6',
+#     'ci_session': 'if3p0ubaedriupff4ee3iveb4uqo7f6d',
+#     '_gid': 'GA1.2.1865445320.1544703551',
+#     '__asc': '82b6b882167a781a753bec6961a',
+#     '_fbp': 'fb.1.1544703552081.48840516',
+#     '_gat': '1',
+#     '_gat_gtag_UA_121888397_1': '1',
+# }
+
+# headers = {
+#     'Pragma': 'no-cache',
+#     'Accept-Encoding': 'gzip, deflate, br',
+#     'Accept-Language': 'en-US,en;q=0.9',
+#     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
+#     'Accept': 'application/json, text/javascript, */*; q=0.01',
+#     'Referer': 'https://www.careeranna.com/test_admin/test/startGroupedTest/all-india-free-cat-2018-mock-test/dahsdiha@hdhsiuahd.com',
+#     'X-Requested-With': 'XMLHttpRequest',
+#     'Connection': 'keep-alive',
+#     'Cache-Control': 'no-cache',
+# }
+
+# params = (
+#     ('mode', 'test'),
+#     ('answerpaper_slug', '49157'),
+# )
+
+# response = requests.get('https://www.careeranna.com/test_admin/test/testStart/cat-2018-varc-02/', headers=headers, params=params, cookies=cookies)
 
 #NB. Original query string below. It seems impossible to parse and
 #reproduce query strings 100% accurately so the one below is given

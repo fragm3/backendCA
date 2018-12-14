@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     url(r'^question/', include('questionmgmt.urls')),
     url(r'^test/', include('testmgmt.urls')),
     url(r'^user/', include('usermgmt.urls')),
+    url(r'^overall/', include('overall.urls')),
 
 )
 
