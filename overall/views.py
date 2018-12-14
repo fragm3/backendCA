@@ -74,7 +74,7 @@ def upload_file(request):
                 s3 = boto3.resource('s3')
                 ts = time.time()
                 created_at = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-                final_filename = str(request.user.id) + "-" + str(ts).replace(".", "")  + ".jpg" 
+                final_filename = "img-" + random_str_generator(2) + str(ts).replace(".", "")  + ".jpg" 
                 s3.Object(bucket_name, 'images/' + final_filename).put(Body=open('overall/metadata/filename.data', 'rb'))
                 filepath = "https://s3.amazonaws.com/"+bucket_name+"/images/"+final_filename
                 fileupload = FileUpload.objects.create(initial_file_name = given_filename,
