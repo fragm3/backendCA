@@ -49,7 +49,7 @@ def crud_user(request):
                 tranObjs = tranObjs.filter(user_role__in=usertype_list)
 
             if search !=None and search !="":
-                tranObjs = tranObjs.filter(Q(first_name__icontains=search) | Q(last_name__icontains=search) | Q(email__icontains=search))
+                tranObjs = tranObjs.filter(Q(first_name__icontains=search) | Q(last_name__icontains=search) | Q(email__icontains=search)| Q(user_role__icontains=search))
 
             if sort_by !=None and sort_by !="" and sort_by != "none":
                 if order == "asc":
