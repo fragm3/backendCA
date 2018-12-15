@@ -20,12 +20,14 @@ def crud_user(request):
     obj['filter'] = {}
     tranObjs = []
     operation = get_param(request, 'operation', "read")
+    allowed_admin_roles = ['staff','manager','admin']
     if operation == "read":
         tranObjs = None
         page_num = get_param(request, 'page_num', None)
         page_size = get_param(request, 'page_size', None)
         search_id = get_param(request,'data_id',None)    
-        usertype = get_param(request,'user_type',None) 
+        usertype = get_param(request,'user_type',None)
+        is_staff = get_param(request,'is_staff',"0") 
         search = get_param(request,'search',None)    
         sort_by = get_param(request,'sort_by',None)    
         order = get_param(request,'order_by',"asc")    
@@ -34,27 +36,20 @@ def crud_user(request):
         else:
             tranObjs = CAUsers.objects.all().order_by('first_name')
             # Filters/Sorting Start
+            if is_staff:
+                if is_staff == "1":
+                    tranObjs = tranObjs.filter(is_staff = True)
+                else:
+                    tranObjs = tranObjs.filter(is_staff = False)
+            
+
             if usertype !=None and usertype !="" and usertype !="none":
                 usertype_list = usertype.split(",")
-                print usertype_list
-                if "staff" in usertype_list:
-                    tranObjs = tranObjs.filter(is_staff=True)
-                    # if "manager" in usertype_list:
-                    #     tranObjs = tranObjs.filter(is_manager=True)                        
-                    #     if "admin" in usertype_list:
-                    #         tranObjs = tranObjs.filter(is_admin=True)                        
-                elif "manager" in usertype_list:
-                    print "here"
-                    tranObjs = tranObjs.filter(is_manager=True)                        
-                    # if "admin" in usertype_list:
-                    #     tranObjs = tranObjs.filter(is_admin=True)                        
-                elif "admin" in usertype_list:
-                    tranObjs = tranObjs.filter(is_admin=True)                                            
-                else:
-                    tranObjs = tranObjs
-                    
+                tranObjs = tranObjs.filter(user_role__in=usertype_list)
+
             if search !=None and search !="":
                 tranObjs = tranObjs.filter(Q(first_name__icontains=search) | Q(last_name__icontains=search) | Q(email__icontains=search))
+
             if sort_by !=None and sort_by !="" and sort_by != "none":
                 if order == "asc":
                     tranObjs = tranObjs.order_by(sort_by)
@@ -77,9 +72,19 @@ def crud_user(request):
         obj['num_pages'] = num_pages
         obj['total_records'] = total_records
         # filter list defining
-        obj['filter']['user_type'] = [{'value':'staff','label':'Staff'},
-                                      {'value':'manager','label':'Manager'},
-                                      {'value':'admin','label':'Admin'}]
+        if is_staff:
+            if is_staff == "1":
+                obj['filter']['user_type'] = [{'value':'staff','label':'Staff'},
+                                            {'value':'manager','label':'Manager'},
+                                            {'value':'admin','label':'Admin'}]
+            else:
+                obj['filter']['user_type'] = [{'value':'user','label':'User'}]
+        else:
+            obj['filter']['user_type'] = [{'value':'user','label':'User'},
+                                        {'value':'staff','label':'Staff'},
+                                        {'value':'manager','label':'Manager'},
+                                        {'value':'admin','label':'Admin'}]
+
         obj['filter']['sort_by'] =   [{'value':'','label':'None'},
                                       {'value':'first_name','label':'First Name'},
                                       {'value':'last_name','label':'Last Name'},
@@ -87,45 +92,42 @@ def crud_user(request):
         obj['filter']['order_by'] = [{'value':'asc','label':'Ascending'},
                                       {'value':'desc','label':'Descending'}]
 
+        obj['filter']['is_staff'] = [{'value':'0','label':'User'},
+                                      {'value':'1','label':'Staff'}]
+
 
     if operation == "create":
         fname            = get_param(request, 'fname', None)
         lname            = get_param(request, 'lname', None)
         email            = get_param(request, 'email', None)
-        is_admin         = get_param(request, 'is_admin', "0")
-        is_manager       = get_param(request, 'is_manager', "0")
         is_staff         = get_param(request, 'is_staff', "0")
-
+        user_role        = get_param(request,'user_role',"user")
         email = email.lower()
         email = cleanstring(email)
         fname  = fname.lower()
         lname  = lname.lower()
+        user_role  = cleanstring(user_role).lower()
         fname  = cleanstring(fname)
         lname  = cleanstring(lname)
-        users = CAUsers.objects.filter(email=email)
 
+        users = CAUsers.objects.filter(email=email)
         if len(users):
             obj['message'] = "User Already Exists!"
         else:
             user  = create_check_user(firstname=fname, lastname = lname, email=email)
-            if is_admin:
-                if is_admin == "1":
-                    user.is_admin = True
-                    user.is_manager = True
+
+            if is_staff:
+                if is_staff == "1":
                     user.is_staff = True
+                    if user_role not in allowed_admin_roles:
+                        user.user_role = "staff"
+                    else:
+                        user.user_role = user_role
+
+                    
                 else:
-                    user.is_admin = False
-                    if is_manager:
-                        if is_manager == "1":
-                            user.is_manager = True
-                            user.is_staff = True
-                        else:
-                            user.is_manager = False
-                            if is_staff:
-                                if is_staff == "1":
-                                    user.is_staff = True
-                                else:
-                                    user.is_staff = False
+                    user.is_staff = False
+                    user.user_role = "user"
 
             user.save()
             tranObjs = [user]
@@ -135,14 +137,15 @@ def crud_user(request):
         data_id          = get_param(request, 'data_id', None)
         fname            = get_param(request, 'fname', None)
         lname            = get_param(request, 'lname', None)
-        is_admin         = get_param(request, 'is_admin', "0")
-        is_manager       = get_param(request, 'is_manager', "0")
         is_staff         = get_param(request, 'is_staff', "0")
+        user_role        = get_param(request,'user_role',"user")
         is_activate      = get_param(request,'is_active',"1")
+
         fname  = fname.lower()
         lname  = lname.lower()
         fname  = cleanstring(fname)
         lname  = cleanstring(lname)
+        user_role  = cleanstring(user_role).lower()
 
         try:
             user = CAUsers.objects.get(id=data_id)
@@ -159,24 +162,18 @@ def crud_user(request):
 
             user.first_name = fname
             user.last_name  = lname
-            if is_admin:
-                if is_admin == "1":
-                    user.is_admin = True
-                    user.is_manager = True
+
+            if is_staff:
+                if is_staff == "1":
                     user.is_staff = True
+                    if user_role not in allowed_admin_roles:
+                        user.user_role = "staff"
+                    else:
+                        user.user_role = user_role
                 else:
-                    user.is_admin = False
-                    if is_manager:
-                        if is_manager == "1":
-                            user.is_manager = True
-                            user.is_staff = True
-                        else:
-                            user.is_manager = False
-                            if is_staff:
-                                if is_staff == "1":
-                                    user.is_staff = True
-                                else:
-                                    user.is_staff = False
+                    user.is_staff = False
+                    user.user_role = "user"
+
             user.save()
             tranObjs = [user]
             obj['message'] = "User Updated"
@@ -189,7 +186,6 @@ def crud_user(request):
             user = None
         obj['message'] = "User Not Found"
 
-        # Code Correction Required Later after checking links
         if user:
             user.active = False
             user.save()
@@ -200,9 +196,8 @@ def crud_user(request):
         'id':trans.id,
         'first_name':trans.first_name,
         'last_name':trans.last_name,
-        'is_admin':trans.is_admin,
         'email':trans.email,
-        'is_manager':trans.is_manager,
+        'user_role':trans.user_role,
         'is_staff':trans.is_staff,
         'secret_string':trans.secret_string,
         'auth_token':trans.auth_token,
@@ -255,8 +250,9 @@ def login_view_staff(request):
             obj['result']['user']['first_name'] = user.first_name
             obj['result']['user']['last_name'] = user.last_name
             obj['result']['user']['email'] = user.email
-            obj['result']['user']['is_admin'] = user.is_admin
-            obj['result']['user']['is_manager'] = user.is_manager
+            # obj['result']['user']['is_admin'] = user.is_admin
+            # obj['result']['user']['is_manager'] = user.is_manager
+            obj['result']['user']['user_role'] = user.user_role
             obj['result']['user']['is_staff'] = user.is_staff
             obj['result']['auth'] = True
             message = "Login Success!"
@@ -283,8 +279,9 @@ def login_view_staff(request):
                     obj['result']['user']['first_name'] = user.first_name
                     obj['result']['user']['last_name'] = user.last_name
                     obj['result']['user']['email'] = user.email
-                    obj['result']['user']['is_admin'] = user.is_admin
-                    obj['result']['user']['is_manager'] = user.is_manager
+                    # obj['result']['user']['is_admin'] = user.is_admin
+                    # obj['result']['user']['is_manager'] = user.is_manager
+                    obj['result']['user']['user_role'] = user.user_role
                     obj['result']['user']['is_staff'] = user.is_staff
                     obj['result']['auth'] = True
                     message = "Login Success!"
@@ -299,8 +296,9 @@ def login_view_staff(request):
                     obj['result']['user']['first_name'] = user.first_name
                     obj['result']['user']['last_name'] = user.last_name
                     obj['result']['user']['email'] = user.email
-                    obj['result']['user']['is_admin'] = user.is_admin
-                    obj['result']['user']['is_manager'] = user.is_manager
+                    # obj['result']['user']['is_admin'] = user.is_admin
+                    # obj['result']['user']['is_manager'] = user.is_manager
+                    obj['result']['user']['user_role'] = user.user_role
                     obj['result']['user']['is_staff'] = user.is_staff
                     obj['result']['auth'] = True
                     message = "Login Success!"
