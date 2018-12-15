@@ -21,7 +21,7 @@ def crud_user(request):
     obj['filter'] = {}
     tranObjs = []
     operation = get_param(request, 'operation', "read")
-    allowed_admin_roles = ['staff','manager','dataentry','admin']
+    allowed_admin_roles = ['admin','manager','staff']
     if operation == "read":
         tranObjs = None
         page_num = get_param(request, 'page_num', None)
