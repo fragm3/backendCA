@@ -72,6 +72,7 @@ def crud_user(request):
         obj['message'] = "Success"
         obj['num_pages'] = num_pages
         obj['total_records'] = total_records
+        obj['filter']['user_type'] = []
         # filter list defining
         if is_staff:
             if is_staff == "1":
