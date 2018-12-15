@@ -94,7 +94,8 @@ def upload_file(request):
                     user_out = str(fileupload.created_by)
 
                 obj['result'].append(
-                   {'initial_file_name':fileupload.initial_file_name,
+                   {'id':fileupload.id,
+                    'initial_file_name':fileupload.initial_file_name,
                     'final_file_name':fileupload.final_file_name,
                     'file_path':fileupload.file_path,
                     'uploaded_at':str(fileupload.uploaded_at),
