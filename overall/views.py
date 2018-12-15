@@ -62,46 +62,47 @@ def upload_file(request):
     obj['result'] = []
     obj['message'] = "Request Recieved!"
     filetype = get_param(request, 'filetype', None)
-    if request.user.is_authenticated and request.user.is_staff:
-        if filetype:
-            if filetype=='image':
-                given_filename = request.FILES["file"].name
-                file = request.FILES["file"]
-                destination = open('filename.data', 'wb')
-                for chunk in file.chunks():
-                    destination.write(chunk)
-                destination.close()
-                s3 = boto3.resource('s3')
-                ts = time.time()
-                created_at = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-                final_filename = "img-" + random_str_generator(2) + str(ts).replace(".", "")  + ".jpg" 
-                s3.Object(bucket_name, 'images/' + final_filename).put(Body=open('filename.data', 'rb'))
-                filepath = "https://s3.amazonaws.com/"+bucket_name+"/images/"+final_filename
-                fileupload = FileUpload.objects.create(initial_file_name = given_filename,
-                                                        final_file_name  = final_filename,
-                                                        file_path        = filepath,
-                                                        uploaded_at      = created_at,
-                                                        file_type        = "image",
-                                                        created_by       = request.user
-                                                        )
-                if os.path.exists('filename.data'):
-                    os.remove('filename.data')
-                obj['status'] = True
-                obj['message'] = "Image Uploaded!"
-                if fileupload.created_by:
-                    user_out = json.loads(str(fileupload.created_by))
-                else:
-                    user_out = str(fileupload.created_by)
+    # if request.user.is_authenticated and request.user.is_staff:
+    if filetype:
+        if filetype=='image':
+            given_filename = request.FILES["file"].name
+            file = request.FILES["file"]
+            destination = open('filename.data', 'wb')
+            for chunk in file.chunks():
+                destination.write(chunk)
+            destination.close()
+            s3 = boto3.resource('s3')
+            ts = time.time()
+            created_at = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+            final_filename = "img-" + random_str_generator(2) + str(ts).replace(".", "")  + ".jpg" 
+            s3.Object(bucket_name, 'images/' + final_filename).put(Body=open('filename.data', 'rb'))
+            filepath = "https://s3.amazonaws.com/"+bucket_name+"/images/"+final_filename
+            fileupload = FileUpload.objects.create(initial_file_name = given_filename,
+                                                    final_file_name  = final_filename,
+                                                    file_path        = filepath,
+                                                    uploaded_at      = created_at,
+                                                    file_type        = "image",
+                                                    created_by       = request.user
+                                                    )
+            if os.path.exists('filename.data'):
+                os.remove('filename.data')
+            obj['status'] = True
+            obj['message'] = "Image Uploaded!"
+            if fileupload.created_by:
+                user_out = json.loads(str(fileupload.created_by))
+            else:
+                user_out = str(fileupload.created_by)
 
-                obj['result'].append(
-                   {'id':fileupload.id,
-                    'initial_file_name':fileupload.initial_file_name,
-                    'final_file_name':fileupload.final_file_name,
-                    'file_path':fileupload.file_path,
-                    'uploaded_at':str(fileupload.uploaded_at),
-                    'file_type':fileupload.file_type,
-                    'created_by':user_out
-                    })
+            obj['result'].append(
+                {'id':fileupload.id,
+                'initial_file_name':fileupload.initial_file_name,
+                'final_file_name':fileupload.final_file_name,
+                'file_path':fileupload.file_path,
+                'uploaded_at':str(fileupload.uploaded_at),
+                'file_type':fileupload.file_type,
+                'created_by':user_out
+                })
+                
     return HttpResponse(json.dumps(obj), content_type='application/json')
 
 
