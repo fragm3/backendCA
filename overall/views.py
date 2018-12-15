@@ -77,15 +77,7 @@ def upload_file(request):
             final_filename = "img-" + random_str_generator(2) + str(ts).replace(".", "")  + ".jpg" 
             s3.Object(bucket_name, 'images/' + final_filename).put(Body=open('filename.data', 'rb'))
             filepath = "https://s3.amazonaws.com/"+bucket_name+"/images/"+final_filename
-            if request.user.is_authenticated:
-                fileupload = FileUpload.objects.create(initial_file_name = given_filename,
-                                                        final_file_name  = final_filename,
-                                                        file_path        = filepath,
-                                                        uploaded_at      = created_at,
-                                                        file_type        = "image",
-                                                        created_by       = request.user
-                                                        )
-            else:
+            if request.user.is_anonymous:
                 fileupload = FileUpload.objects.create(initial_file_name = given_filename,
                                                         final_file_name  = final_filename,
                                                         file_path        = filepath,
@@ -93,6 +85,15 @@ def upload_file(request):
                                                         file_type        = "image",
                                                         created_by       = None
                                                         )
+            else:
+                fileupload = FileUpload.objects.create(initial_file_name = given_filename,
+                                                        final_file_name  = final_filename,
+                                                        file_path        = filepath,
+                                                        uploaded_at      = created_at,
+                                                        file_type        = "image",
+                                                        created_by       = request.user
+                                                        )
+               
             if os.path.exists('filename.data'):
                 os.remove('filename.data')
             obj['status'] = True
