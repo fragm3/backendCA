@@ -9,6 +9,7 @@ from models import CAUsers
 from mailing import views as mailing
 import math
 import json
+from titlecase import titlecase
 
 # Create your views here.
 # Creating or checking a users existence in the database
@@ -20,7 +21,7 @@ def crud_user(request):
     obj['filter'] = {}
     tranObjs = []
     operation = get_param(request, 'operation', "read")
-    allowed_admin_roles = ['staff','manager','admin']
+    allowed_admin_roles = ['staff','manager','dataentry','admin']
     if operation == "read":
         tranObjs = None
         page_num = get_param(request, 'page_num', None)
@@ -74,16 +75,19 @@ def crud_user(request):
         # filter list defining
         if is_staff:
             if is_staff == "1":
-                obj['filter']['user_type'] = [{'value':'staff','label':'Staff'},
-                                            {'value':'manager','label':'Manager'},
-                                            {'value':'admin','label':'Admin'}]
+                for role in allowed_admin_roles:
+                    obj['filter']['user_type'].append({
+                            'value':role,
+                            'label':titlecase(role)
+                            })
             else:
                 obj['filter']['user_type'] = [{'value':'user','label':'User'}]
         else:
-            obj['filter']['user_type'] = [{'value':'user','label':'User'},
-                                        {'value':'staff','label':'Staff'},
-                                        {'value':'manager','label':'Manager'},
-                                        {'value':'admin','label':'Admin'}]
+            obj['filter']['user_type'] = [{'value':'user','label':'User'}]
+            obj['filter']['user_type'].append({
+                            'value':role,
+                            'label':titlecase(role)
+                            })
 
         obj['filter']['sort_by'] =   [{'value':'','label':'None'},
                                       {'value':'first_name','label':'First Name'},
