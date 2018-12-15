@@ -77,14 +77,15 @@ def crud_user(request):
         obj['num_pages'] = num_pages
         obj['total_records'] = total_records
         # filter list defining
-        obj['filter']['user_type'] = [{'id':'staff','label':'Staff'},
-                                      {'id':'manager','label':'Manager'},
-                                      {'id':'admin','label':'Admin'}]
-        obj['filter']['sort_by'] = [{'id':'first_name','label':'First Name'},
-                                      {'id':'last_name','label':'Last Name'},
-                                      {'id':'email','label':'Email'}]
-        obj['filter']['order_by'] = [{'id':'asc','label':'Ascending'},
-                                      {'id':'desc','label':'Descending'}]
+        obj['filter']['user_type'] = [{'value':'staff','label':'Staff'},
+                                      {'value':'manager','label':'Manager'},
+                                      {'value':'admin','label':'Admin'}]
+        obj['filter']['sort_by'] =   [{'value':'','label':'None'},
+                                      {'value':'first_name','label':'First Name'},
+                                      {'value':'last_name','label':'Last Name'},
+                                      {'value':'email','label':'Email'}]
+        obj['filter']['order_by'] = [{'value':'asc','label':'Ascending'},
+                                      {'value':'desc','label':'Descending'}]
 
 
     if operation == "create":

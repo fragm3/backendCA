@@ -63,10 +63,12 @@ def crud_testfolders(request):
         obj['message'] = "Success"
         obj['num_pages'] = num_pages
         obj['total_records'] = total_records
-        obj['filter']['sort_by'] = [{'id':'folder_name','label':'Folder Name'},
-                                    {'id':'description','label':'Description'}]
-        obj['filter']['order_by'] = [{'id':'asc','label':'Ascending'},
-                                    {'id':'desc','label':'Descending'}]
+        obj['filter']['sort_by'] = [
+                                    {'value':'','label':'None'},
+                                    {'value':'folder_name','label':'Folder Name'},
+                                    {'value':'description','label':'Description'}]
+        obj['filter']['order_by'] = [{'value':'asc','label':'Ascending'},
+                                    {'value':'desc','label':'Descending'}]
 
 
 

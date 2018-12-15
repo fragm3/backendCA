@@ -74,17 +74,18 @@ def crud_topics(request):
         obj['filter']['category'] = []
         for item in category_list:
             obj['filter']['category'].append({
-                'id':item.category,
+                'value':item.category,
                 'label':(item.category).title()
                 })
-        obj['filter']['category'] = {v['id']:v for v in obj['filter']['category']}.values()
+        obj['filter']['category'] = {v['value']:v for v in obj['filter']['category']}.values()
         obj['filter']['category'] = sorted(obj['filter']['category'], key=operator.itemgetter('id'))
 
-        obj['filter']['sort_by'] = [{'id':'category','label':'Category'},
-                                    {'id':'sub_category','label':'Sub Category'},
-                                    {'id':'description','label':'Description'}]
-        obj['filter']['order_by'] = [{'id':'asc','label':'Ascending'},
-                                    {'id':'desc','label':'Descending'}]
+        obj['filter']['sort_by'] = [{'value':'','label':'None'},
+                                    {'value':'category','label':'Category'},
+                                    {'value':'sub_category','label':'Sub Category'},
+                                    {'value':'description','label':'Description'}]
+        obj['filter']['order_by'] = [{'value':'asc','label':'Ascending'},
+                                    {'value':'desc','label':'Descending'}]
 
 
 
@@ -194,10 +195,12 @@ def crud_folders(request):
         obj['message'] = "Success"
         obj['num_pages'] = num_pages
         obj['total_records'] = total_records
-        obj['filter']['sort_by'] = [{'id':'folder_name','label':'Folder Name'},
-                                    {'id':'description','label':'Description'}]
-        obj['filter']['order_by'] = [{'id':'asc','label':'Ascending'},
-                                    {'id':'desc','label':'Descending'}]
+        obj['filter']['sort_by'] = [
+                                    {'value':'','label':'None'},
+                                    {'value':'folder_name','label':'Folder Name'},
+                                    {'value':'description','label':'Description'}]
+        obj['filter']['order_by'] = [{'value':'asc','label':'Ascending'},
+                                    {'value':'desc','label':'Descending'}]
 
 
 
@@ -410,40 +413,40 @@ def crud_questions(request):
         obj['message'] = "Success"
         obj['num_pages'] = num_pages
         obj['total_records'] = total_records
-        obj['filter']['sort_by'] = [
-                                    {'id':'question_type','label':'Question Type'},
-                                    {'id':'topic','label':'Topic'},
-                                    {'id':'difficulty_user','label':'Difficulty'},
-                                    {'id':'created_at','label':'Created At'},
-                                    {'id':'modified_at','label':'Modified At'},
+        obj['filter']['sort_by'] = [{'value':'','label':'None'},
+                                    {'value':'question_type','label':'Question Type'},
+                                    {'value':'topic','label':'Topic'},
+                                    {'value':'difficulty_user','label':'Difficulty'},
+                                    {'value':'created_at','label':'Created At'},
+                                    {'value':'modified_at','label':'Modified At'},
                                     ]
-        obj['filter']['order_by'] = [{'id':'asc','label':'Ascending'},
-                                    {'id':'desc','label':'Descending'}]
+        obj['filter']['order_by'] = [{'value':'asc','label':'Ascending'},
+                                    {'value':'desc','label':'Descending'}]
 
         obj['filter']['question_type'] = [
-                                    {'id':'mcq_single','label':'MCQ Single'},
-                                    {'id':'mcq_multiple','label':'MCQ Multiple'},
-                                    {'id':'word','label':'Word'},
-                                    {'id':'number','label':'Number'},
-                                    {'id':'essay','label':'Essay'},
-                                    {'id':'chooseorder','label':'Choose Order'},
-                                    {'id':'in_question_drop_down','label':'In Question Drop Down'},
-                                    {'id':'in_question_word','label':'In Question Word'},
-                                    {'id':'in_question_number','label':'In Question Number'},                                                                    
+                                    {'value':'mcq_single','label':'MCQ Single'},
+                                    {'value':'mcq_multiple','label':'MCQ Multiple'},
+                                    {'value':'word','label':'Word'},
+                                    {'value':'number','label':'Number'},
+                                    {'value':'essay','label':'Essay'},
+                                    {'value':'chooseorder','label':'Choose Order'},
+                                    {'value':'in_question_drop_down','label':'In Question Drop Down'},
+                                    {'value':'in_question_word','label':'In Question Word'},
+                                    {'value':'in_question_number','label':'In Question Number'},                                                                    
                                     ]
 
         obj['filter']['difficulty'] = [
-                                    {'id':'1','label':'One'},
-                                    {'id':'2','label':'Two'},
-                                    {'id':'3','label':'Three'},
-                                    {'id':'4','label':'Four'},
-                                    {'id':'5','label':'Five'},
-                                    {'id':'6','label':'Six'},
+                                    {'value':'1','label':'One'},
+                                    {'value':'2','label':'Two'},
+                                    {'value':'3','label':'Three'},
+                                    {'value':'4','label':'Four'},
+                                    {'value':'5','label':'Five'},
+                                    {'value':'6','label':'Six'},
                                     ]
 
-        obj['filter']['is_passage'] = [
-                                    {'id':'0','label':'No'},
-                                    {'id':'1','label':'Yes'},
+        obj['filter']['is_passage'] = [{'value':'','label':'None'},
+                                    {'value':'0','label':'No'},
+                                    {'value':'1','label':'Yes'},
                                     ]
 
 
