@@ -88,11 +88,14 @@ def upload_file(request):
                 os.remove('filename.data')
             obj['status'] = True
             obj['message'] = "Image Uploaded!"
-            if fileupload.created_by:
-                user_out = json.loads(str(fileupload.created_by))
-            else:
-                user_out = str(fileupload.created_by)
-
+            try:
+                if fileupload.created_by:
+                    user_out = json.loads(str(fileupload.created_by))
+                else:
+                    user_out = str(fileupload.created_by)
+            except:
+                user_out = None
+                
             obj['result'].append(
                 {'id':fileupload.id,
                 'initial_file_name':fileupload.initial_file_name,
@@ -102,7 +105,7 @@ def upload_file(request):
                 'file_type':fileupload.file_type,
                 'created_by':user_out
                 })
-                
+
     return HttpResponse(json.dumps(obj), content_type='application/json')
 
 
