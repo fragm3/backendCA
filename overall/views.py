@@ -67,7 +67,7 @@ def upload_file(request):
             if filetype=='image':
                 given_filename = request.FILES["file"].name
                 file = request.FILES["file"]
-                destination = open('/overall/metadata/filename.data', 'wb')
+                destination = open('metadata/filename.data', 'wb')
                 for chunk in file.chunks():
                     destination.write(chunk)
                 destination.close()
@@ -75,7 +75,7 @@ def upload_file(request):
                 ts = time.time()
                 created_at = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
                 final_filename = "img-" + random_str_generator(2) + str(ts).replace(".", "")  + ".jpg" 
-                s3.Object(bucket_name, 'images/' + final_filename).put(Body=open('/overall/metadata/filename.data', 'rb'))
+                s3.Object(bucket_name, 'images/' + final_filename).put(Body=open('metadata/filename.data', 'rb'))
                 filepath = "https://s3.amazonaws.com/"+bucket_name+"/images/"+final_filename
                 fileupload = FileUpload.objects.create(initial_file_name = given_filename,
                                                         final_file_name  = final_filename,
@@ -84,8 +84,8 @@ def upload_file(request):
                                                         file_type        = "image",
                                                         created_by       = request.user
                                                         )
-                if os.path.exists('/overall/metadata/filename.data'):
-                    os.remove('/overall/metadata/filename.data')
+                if os.path.exists('metadata/filename.data'):
+                    os.remove('metadata/filename.data')
                 obj['status'] = True
                 obj['message'] = "Image Uploaded!"
                 if fileupload.created_by:
