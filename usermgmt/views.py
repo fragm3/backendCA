@@ -91,9 +91,11 @@ def crud_user(request):
                             })
 
         obj['filter']['sort_by'] =   [{'value':'','label':'None'},
+
                                       {'value':'first_name','label':'First Name'},
                                       {'value':'last_name','label':'Last Name'},
-                                      {'value':'email','label':'Email'}]
+                                      {'value':'email','label':'Email'},
+                                    {'value':'user_role','label':'User Role'}]
         obj['filter']['order_by'] = [{'value':'asc','label':'Ascending'},
                                       {'value':'desc','label':'Descending'}]
 
