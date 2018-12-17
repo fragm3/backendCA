@@ -299,10 +299,13 @@ def crud_passages(request):
     if operation == "create":
         header      = get_param(request, 'header', None)
         text        = get_param(request, 'text', None)
-        data_dict   = get_param(request, 'data_dict', [])
+        data_dict   = get_param(request, 'data_dict', None)
         if data_dict:
             if len(data_dict):
                  data_dict = json.loads(data_dict)
+        else:
+            data_dict = []
+
         tranObjs     = Passages.objects.filter(header=header,text=text)
 
         if len(tranObjs):
