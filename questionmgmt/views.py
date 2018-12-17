@@ -94,6 +94,7 @@ def crud_topics(request):
         category     = get_param(request, 'category', None)
         sub_category = get_param(request, 'subcategory', None)
         description  = get_param(request,'desc',None)
+
         category     = cleanstring(category).lower()
         sub_category = cleanstring(sub_category).lower()
         description  = cleanstring(description)
@@ -494,7 +495,10 @@ def crud_questions(request):
                 passage = Passages.objects.get(id=passage_id)
             else:
                 passage = None
-            user = request.user
+            if request.user.is_anonymous:
+                user = None
+            else:
+                user = request.user
             try:
                 folder = QuestionFolder.objects.get(id=question_folder)
             except:
