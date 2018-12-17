@@ -301,7 +301,8 @@ def crud_passages(request):
         text        = get_param(request, 'text', None)
         data_dict   = get_param(request, 'data_dict', [])
         if data_dict:
-            data_dict = json.loads(data_dict)
+            if len(data_dict):
+                 data_dict = json.loads(data_dict)
         tranObjs     = Passages.objects.filter(header=header,text=text)
 
         if len(tranObjs):
@@ -421,6 +422,7 @@ def crud_questions(request):
                                     {'value':'created_at','label':'Created At'},
                                     {'value':'modified_at','label':'Modified At'},
                                     ]
+
         obj['filter']['order_by'] = [{'value':'asc','label':'Ascending'},
                                     {'value':'desc','label':'Descending'}]
 
@@ -446,6 +448,25 @@ def crud_questions(request):
                                     ]
 
         obj['filter']['is_passage'] = [{'value':'','label':'None'},
+                                    {'value':'0','label':'No'},
+                                    {'value':'1','label':'Yes'},
+                                    ]
+
+        obj['filter']['is_random'] = [{'value':'','label':'None'},
+                                    {'value':'0','label':'No'},
+                                    {'value':'1','label':'Yes'},
+                                    ]
+        
+        obj['filter']['topics'] = []
+        topics = Topics.objects.all()
+        for topic in topics:
+            obj['filter']['topics'].append({
+                'value':topic.id,
+                'label':topic.category + " - " + topic.sub_category
+            })
+
+
+        obj['filter']['to_evaluate'] = [{'value':'','label':'None'},
                                     {'value':'0','label':'No'},
                                     {'value':'1','label':'Yes'},
                                     ]

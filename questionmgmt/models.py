@@ -13,7 +13,7 @@ class Topics(models.Model):
         return json.dumps({'id':self.id,'category':self.category,'sub_category':self.sub_category})
 
 class Passages(models.Model):
-    header      = models.CharField(max_length=50)
+    header      = models.CharField(max_length=50,null=True)
     text        = models.CharField(max_length=1000)
     data_table  = ListField(DictField())
     def __str__(self):
