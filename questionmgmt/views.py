@@ -78,7 +78,7 @@ def crud_topics(request):
                 'label':(item.category).title()
                 })
         obj['filter']['category'] = {v['value']:v for v in obj['filter']['category']}.values()
-        obj['filter']['category'] = sorted(obj['filter']['category'], key=operator.itemgetter('id'))
+        obj['filter']['category'] = sorted(obj['filter']['category'], key=operator.itemgetter('value'))
 
         obj['filter']['sort_by'] = [{'value':'','label':'None'},
                                     {'value':'category','label':'Category'},
