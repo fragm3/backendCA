@@ -319,9 +319,12 @@ def crud_passages(request):
         data_id      = get_param(request, 'data_id', None)
         header      = get_param(request, 'header', None)
         text        = get_param(request, 'text', None)
-        data_dict   = get_param(request, 'data_dict', [])
+        data_dict   = get_param(request, 'data_dict', None)
         if data_dict:
-            data_dict = json.loads(data_dict)
+            if len(data_dict):
+                data_dict = json.loads(data_dict)
+        else:
+            data_dict = []
         try:         
             passage = Passages.objects.get(id=data_id)
         except:
@@ -383,14 +386,22 @@ def crud_questions(request):
         folder_id = get_param(request,'folder_id',None)    
         search = get_param(request,'search',None)    
         sort_by = get_param(request,'sort_by',None)    
-        order = get_param(request,'order_by',None)    
-        
+        order = get_param(request,'order_by',None)   
+        question_type = get_param(request,'question_type',None)   
+        difficulty = get_param(request,'difficulty',None)   
+        is_passage = get_param(request,'is_passage',None)   
+        is_random = get_param(request,'is_random',None)   
+        topic_id = get_param(request,'topic_id',None)   
+
         if data_id != None and data_id != "":
             tranObjs = Questions.objects.filter(id=data_id)
         else:
             tranObjs = Questions.objects.all()
             # Filters/Sorting Start
-            if search !=None and search !="":
+            if folder_id !=None and  folder_id !="" and folder_id != "none":
+                tranObjs = tranObjs.filter(question_folder__id = folder_id)
+
+            if search !=None and search !=""  and category != "none":
                 tranObjs = tranObjs.filter(question_text__icontains=search)
             
             if sort_by !=None and sort_by !="" and sort_by != "none":
@@ -399,8 +410,33 @@ def crud_questions(request):
                 else:
                     tranObjs = tranObjs.order_by("-" + sort_by)
 
-            if folder_id !=None and  folder_id !="" and folder_id != "none":
-                tranObjs = tranObjs.filter(question_folder__id = folder_id)
+            if question_type !=None and question_type !=""  and question_type != "none":
+                print "test"
+                question_type_list = question_type.split(",")
+                tranObjs = tranObjs.filter(question_type__in=question_type_list)
+
+            if difficulty !=None and difficulty !=""  and difficulty != "none":
+                difficulty_list = difficulty.split(",")
+                tranObjs = tranObjs.filter(difficulty__in=difficulty_list)
+
+            if is_passage !=None and is_passage !=""  and is_passage != "none":
+                if is_passage == "1":
+                    tranObjs = tranObjs.filter(is_passage=True)
+                else:
+                    tranObjs = tranObjs.filter(is_passage=False)
+
+            if is_random !=None and is_random !=""  and is_random != "none":
+                if is_random == "1":
+                    tranObjs = tranObjs.filter(is_random=True)
+                else:
+                    tranObjs = tranObjs.filter(is_random=False)
+
+            if topic_id !=None and topic_id !=""  and topic_id != "none":
+                topic_id_list = topic_id.split(",")
+                print "here"
+                tranObjs = tranObjs.filter(topic__id__in = topic_id_list)
+
+
 
             # Filters/Sorting End
         # pagination variable
@@ -699,5 +735,10 @@ def crud_questions(request):
     return HttpResponse(json.dumps(obj), content_type='application/json')
 
 
+def check_api(request):
+    check = get_param(request, 'check', None)
+    if check:
+        check = 1
+    return HttpResponse(json.dumps(check), content_type='application/json')
 
 
