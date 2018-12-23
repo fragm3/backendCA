@@ -424,7 +424,8 @@ def crud_questions(request):
 
             if difficulty !=None and difficulty !=""  and difficulty != "none":
                 difficulty_list = difficulty.split(",")
-                tranObjs = tranObjs.filter(difficulty__in=difficulty_list)
+                difficulty_list = map(lambda x : int(x),difficulty_list)
+                tranObjs = tranObjs.filter(difficulty_user__in=difficulty_list)
 
             if is_passage !=None and is_passage !=""  and is_passage != "none":
                 if is_passage == "1":

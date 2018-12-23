@@ -10,3 +10,4 @@ mongo
 requests
 urllib3
 boto3
+fuzzywuzzy
