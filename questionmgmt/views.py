@@ -11,10 +11,20 @@ import time
 from datetime import datetime
 from testmgmt.models import SectionQuestions
 import operator
-
+from fuzzywuzzy import fuzz
 # Create your views here.
 
-
+question_types = [
+                 {'value':'mcq_single','label':'MCQ Single'},
+                  {'value':'mcq_multiple','label':'MCQ Multiple'},
+                  {'value':'word','label':'Word'},
+                  {'value':'number','label':'Number'},
+                  {'value':'essay','label':'Essay'},
+                  {'value':'chooseorder','label':'Choose Order'},
+                  {'value':'in_question_drop_down','label':'In Question Drop Down'},
+                  {'value':'in_question_word','label':'In Question Word'},
+                  {'value':'in_question_number','label':'In Question Number'},                                                                    
+                  ]
 
 
 def crud_topics(request):
@@ -87,9 +97,6 @@ def crud_topics(request):
         obj['filter']['order_by'] = [{'value':'asc','label':'Ascending'},
                                     {'value':'desc','label':'Descending'}]
 
-
-
-
     if operation == "create":
         category     = get_param(request, 'category', None)
         sub_category = get_param(request, 'subcategory', None)
@@ -109,7 +116,7 @@ def crud_topics(request):
 
     if operation == "update":
         data_id      = get_param(request, 'data_id', None)
-        
+
         category     = get_param(request, 'category', None)
         sub_category = get_param(request, 'subcategory', None)
         description  = get_param(request,'desc',None)
@@ -129,7 +136,7 @@ def crud_topics(request):
             topic.save()
             tranObjs = [topic]
             obj['message'] = "Topic Updated"
-
+        
     if operation == "delete":
         data_id      = get_param(request, 'data_id', None)
         try:
@@ -465,17 +472,7 @@ def crud_questions(request):
         obj['filter']['order_by'] = [{'value':'asc','label':'Ascending'},
                                     {'value':'desc','label':'Descending'}]
 
-        obj['filter']['question_type'] = [
-                                    {'value':'mcq_single','label':'MCQ Single'},
-                                    {'value':'mcq_multiple','label':'MCQ Multiple'},
-                                    {'value':'word','label':'Word'},
-                                    {'value':'number','label':'Number'},
-                                    {'value':'essay','label':'Essay'},
-                                    {'value':'chooseorder','label':'Choose Order'},
-                                    {'value':'in_question_drop_down','label':'In Question Drop Down'},
-                                    {'value':'in_question_word','label':'In Question Word'},
-                                    {'value':'in_question_number','label':'In Question Number'},                                                                    
-                                    ]
+        obj['filter']['question_type'] = question_types
 
         obj['filter']['difficulty'] = [
                                     {'value':'1','label':'One'},
@@ -740,5 +737,82 @@ def check_api(request):
     if check:
         check = 1
     return HttpResponse(json.dumps(check), content_type='application/json')
+
+
+def check_answer(question,response):
+    answer = True
+    answer_options = True
+    answer_len  = True
+    num_question_set = question.total_num_set_answers
+    if question.question_type in ['mcq_single','mcq_multiple','in_question_drop_down']:
+        for num in range(1,num_question_set):
+            for res in response[str(num)]:
+                if res not in question.correct_answer[str(num)]
+                    answer_options = False
+
+            if len(response[str(num)]) != question.correct_answer[str(num)]
+                answer_len = False
+            
+        answer = (answer_options and answer_len)
+                    
+    if question.question_type in ['word','in_question_word']:
+         for num in range(1,num_question_set):
+            res = response[str(num)]
+            if fuzz.ratio(res.lower(), question.correct_answer[str(num)].lower()) <= 90:
+                answer = False
+
+    if question.question_type in ['number','in_question_number']:
+         for num in range(1,num_question_set):
+            res = response[str(num)]
+            if float(res) != float(question.correct_answer[str(num)]):
+                answer = False
+
+    if question.question_type in ['chooseorder']:
+        for num in range(1,num_question_set):
+            if response[str(num)] != question.correct_answer[str(num)]:
+                answer = False
+    return answer
+
+def check_answer_api(request):
+    obj = {}
+    obj['status'] = False
+    obj['result'] = {
+                    "answer":False
+                    }
+    obj['message'] = "Request Recieved"
+    question_id = get_param(request, 'q_id', None)   
+    qresponse = get_param(request, 'qresponse', None)   
+    qtype = get_param(request, 'qtype', None)   
+    if_correct = True
+
+    if qtype == "individual":
+        try:
+            question = Questions.objects.get(id=question_id)
+            message = "question found"
+        except:
+            message = "question not found"
+    
+    if qtype == "test":
+        try:
+            question = Questions.objects.get(id=question_id)
+            message = "question found"
+        except:
+            message = "question not found"
+    
+    if question:
+        if question.to_evaluate and question.type != "essay":
+            message = "evaluation possible"
+            try:
+                if_correct = check_answer(question=question,response=json.loads(qresponse))
+                message = "Success!"
+            except:
+                message = "error in evaluation"
+        else:
+            message = "evaluation not possible"
+
+
+    obj['message'] = message
+    obj['result'] = {'answer':if_correct}
+    return HttpResponse(json.dumps(obj), content_type='application/json')
 
 
