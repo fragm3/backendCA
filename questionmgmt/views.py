@@ -750,7 +750,7 @@ def check_answer(question,response):
                 if res not in question.correct_answer[str(num)]:
                     answer_options = False
 
-            if len(response[str(num)]) != question.correct_answer[str(num)]
+            if len(response[str(num)]) != question.correct_answer[str(num)]:
                 answer_len = False
             
         answer = (answer_options and answer_len)
