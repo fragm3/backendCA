@@ -739,10 +739,6 @@ def crud_questions(request):
         else:
             user_out = str(trans.created_by)
 
-        if trans.question_type:
-
-
-
         obj['result'].append({
         'id':trans.id,
         'question_text':trans.question_text,        
