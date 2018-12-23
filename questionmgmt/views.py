@@ -747,7 +747,7 @@ def check_answer(question,response):
     if question.question_type in ['mcq_single','mcq_multiple','in_question_drop_down']:
         for num in range(1,num_question_set):
             for res in response[str(num)]:
-                if res not in question.correct_answer[str(num)]
+                if res not in question.correct_answer[str(num)]:
                     answer_options = False
 
             if len(response[str(num)]) != question.correct_answer[str(num)]
