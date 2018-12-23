@@ -14,17 +14,17 @@ import operator
 from fuzzywuzzy import fuzz
 # Create your views here.
 
-question_types = [
-                 {'value':'mcq_single','label':'MCQ Single'},
-                  {'value':'mcq_multiple','label':'MCQ Multiple'},
-                  {'value':'word','label':'Word'},
-                  {'value':'number','label':'Number'},
-                  {'value':'essay','label':'Essay'},
-                  {'value':'chooseorder','label':'Choose Order'},
-                  {'value':'in_question_drop_down','label':'In Question Drop Down'},
-                  {'value':'in_question_word','label':'In Question Word'},
-                  {'value':'in_question_number','label':'In Question Number'},                                                                    
-                  ]
+question_types = {
+                  'mcq_single':'MCQ Single',
+                  'mcq_multiple':'MCQ Multiple',
+                  'word':'Word',
+                  'number':'Number',
+                  'essay':'Essay',
+                  'chooseorder':'Choose Order',
+                  'in_question_drop_down':'In Question Drop Down',
+                  'in_question_word':'In Question Word',
+                  'in_question_number':'In Question Number',                                                                    
+                  }
 question_types_list = [
                  'mcq_single'
                 ,'mcq_multiple'
@@ -494,8 +494,10 @@ def crud_questions(request):
 
         obj['filter']['order_by'] = [{'value':'asc','label':'Ascending'},
                                     {'value':'desc','label':'Descending'}]
+        obj['filter']['question_type'] = []
 
-        obj['filter']['question_type'] = question_types
+        for ques_type in question_types_list:
+            obj['filter']['question_type'].append({'value':ques_type,'label':question_types[ques_type]})
 
         obj['filter']['difficulty'] = [
                                     {'value':'1','label':'1'},
@@ -737,11 +739,14 @@ def crud_questions(request):
         else:
             user_out = str(trans.created_by)
 
+        if trans.question_type:
+
+
 
         obj['result'].append({
         'id':trans.id,
         'question_text':trans.question_text,        
-        'question_type':trans.question_type,           
+        'question_type':{"value":trans.question_type,"label":question_types[trans.question_type]},           
         # 'topic': serializers.serialize("json", trans.topic),          
         'topic': topic_out,          
         'total_num_set_answers':trans.total_num_set_answers,    
