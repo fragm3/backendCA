@@ -801,7 +801,7 @@ def check_answer_api(request):
             message = "question not found"
     
     if question:
-        if question.to_evaluate and question.type != "essay":
+        if question.to_evaluate and question.question_type != "essay":
             message = "evaluation possible"
             try:
                 if_correct = check_answer(question=question,response=json.loads(qresponse))
