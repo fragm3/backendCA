@@ -430,7 +430,7 @@ def crud_questions(request):
             if folder_id !=None and  folder_id !="" and folder_id != "none":
                 tranObjs = tranObjs.filter(question_folder__id = folder_id)
 
-            if search !=None and search !=""  and category != "none":
+            if search !=None and search !=""  and search != "none":
                 tranObjs = tranObjs.filter(question_text__icontains=search)
             
             if sort_by !=None and sort_by !="" and sort_by != "none":
@@ -763,6 +763,35 @@ def crud_questions(request):
     obj['status'] = True
     return HttpResponse(json.dumps(obj), content_type='application/json')
 
+# def check_answer_dict(question_type,option_dict,answer_dict,total_num_set_answers):
+#     obj = {}
+#     obj['message'] = "Check Start"
+#     obj['allowed'] = False
+#     if question_type in ['mcq_single','mcq_multiple','in_question_drop_down']:
+#         for num in range(1,num_question_set+1):
+#             try:
+#                 answer_dictionary_check = answer_dict[str(num)]
+#                 obj['message'] = "Dictionary Correct"
+#                 try:
+#                     if len(answer_dictionary_check) >= 1:
+#                         for val in answer_dictionary_check:
+#                             obj['message'] = "Dictionary Correct"
+#                     else:
+#                         obj['message'] = "Values Present Correct"
+#                 except:
+#                     obj['message'] = "Options values not passed as list"
+    
+#             except:
+#                 obj['message'] = "Dictionary Incorrect"
+#                 return obj
+
+
+#                 if res not in question.correct_answer[str(num)]:
+#                     answer_options = False
+#             if len(response[str(num)]) != len(question.correct_answer[str(num)]):
+#                 answer_len = False
+
+
 
 def check_api(request):
     check = get_param(request, 'check', None)
@@ -819,28 +848,27 @@ def check_answer_api(request):
     if qtype == "individual":
         try:
             question = Questions.objects.get(id=question_id)
-            message = "question found"
+            message = "Question Found"
         except:
-            message = "question not found"
+            message = "Question Not Found"
     
     if qtype == "test":
         try:
             question = Questions.objects.get(id=question_id)
-            message = "question found"
+            message = "Question Found"
         except:
-            message = "question not found"
+            message = "Question not Found"
     
     if question:
         if question.to_evaluate and question.question_type != "essay":
-            message = "evaluation possible"
+            message = "Evaluation Possible"
             try:
                 if_correct = check_answer(question=question,response=json.loads(qresponse))
                 message = "Success!"
             except:
-                message = "error in evaluation"
+                message = "Error in Evaluation"
         else:
-            message = "evaluation not possible"
-
+            message = "Evaluation not Possible"
 
     obj['message'] = message
     obj['status'] = True
