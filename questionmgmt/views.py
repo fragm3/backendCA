@@ -572,7 +572,7 @@ def crud_questions(request):
                 question_type            = question_type,
                 topic                    = topic,
                 total_num_set_answers    = total_num_set_answers,
-                difficulty_user          = difficulty_user,
+                difficulty_user          = int(difficulty_user),
                 to_evaluate              = to_evaluate,
                 solution                 = solution,
                 is_passage               = is_passage,
@@ -649,7 +649,7 @@ def crud_questions(request):
             question.question_type            = question_type
             question.topic                    = topic
             question.total_num_set_answers    = total_num_set_answers
-            question.difficulty_user          = difficulty_user
+            question.difficulty_user          = int(difficulty_user)
             question.to_evaluate              = to_evaluate
             question.is_passage               = is_passage
             question.solution                 = solution
