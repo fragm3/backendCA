@@ -746,30 +746,29 @@ def check_answer(question,response):
     answer_len  = True
     num_question_set = question.total_num_set_answers
     if question.question_type in ['mcq_single','mcq_multiple','in_question_drop_down']:
-        for num in range(1,num_question_set):
+        for num in range(1,num_question_set+1):
             for res in response[str(num)]:
                 if res not in question.correct_answer[str(num)]:
                     answer_options = False
-
             if len(response[str(num)]) != question.correct_answer[str(num)]:
                 answer_len = False
             
         answer = (answer_options and answer_len)
                     
     if question.question_type in ['word','in_question_word']:
-         for num in range(1,num_question_set):
+         for num in range(1,num_question_set+1):
             res = response[str(num)]
             if fuzz.ratio(res.lower(), question.correct_answer[str(num)].lower()) <= 90:
                 answer = False
 
     if question.question_type in ['number','in_question_number']:
-         for num in range(1,num_question_set):
+         for num in range(1,num_question_set+1):
             res = response[str(num)]
             if float(res) != float(question.correct_answer[str(num)]):
                 answer = False
 
     if question.question_type in ['chooseorder']:
-        for num in range(1,num_question_set):
+        for num in range(1,num_question_set+1):
             if response[str(num)] != question.correct_answer[str(num)]:
                 answer = False
     return answer
@@ -813,6 +812,7 @@ def check_answer_api(request):
 
 
     obj['message'] = message
+    obj['status'] = True
     obj['result'] = {'answer':if_correct}
     return HttpResponse(json.dumps(obj), content_type='application/json')
 
