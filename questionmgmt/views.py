@@ -26,7 +26,7 @@ question_types = [
                   {'value':'in_question_number','label':'In Question Number'},                                                                    
                   ]
 question_types_list = [
-                 'mcq_single',
+                 'mcq_single'
                 ,'mcq_multiple'
                 ,'word'
                 ,'number'
@@ -38,7 +38,7 @@ question_types_list = [
                 ]
 
 difficulty_types_list = [
-                 '1',
+                 '1'
                 ,'2'
                 ,'3'
                 ,'4'
