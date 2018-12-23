@@ -435,9 +435,9 @@ def crud_questions(request):
 
             if is_random !=None and is_random !=""  and is_random != "none":
                 if is_random == "1":
-                    tranObjs = tranObjs.filter(is_random=True)
+                    tranObjs = tranObjs.filter(is_random_order=True)
                 else:
-                    tranObjs = tranObjs.filter(is_random=False)
+                    tranObjs = tranObjs.filter(is_random_order=False)
 
             if topic_id !=None and topic_id !=""  and topic_id != "none":
                 topic_id_list = topic_id.split(",")
