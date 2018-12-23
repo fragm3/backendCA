@@ -25,6 +25,26 @@ question_types = [
                   {'value':'in_question_word','label':'In Question Word'},
                   {'value':'in_question_number','label':'In Question Number'},                                                                    
                   ]
+question_types_list = [
+                 'mcq_single',
+                ,'mcq_multiple'
+                ,'word'
+                ,'number'
+                ,'essay'
+                ,'chooseorder'
+                ,'in_question_drop_down'
+                ,'in_question_word'
+                ,'in_question_number'
+                ]
+
+difficulty_types_list = [
+                 '1',
+                ,'2'
+                ,'3'
+                ,'4'
+                ,'5'
+                ,'6']
+
 
 
 def crud_topics(request):
@@ -378,6 +398,8 @@ def crud_passages(request):
 
 
 # Query Correction at deletion pending 
+
+# Answer Dict/ Options Dict Check Addition
 def crud_questions(request):
     obj = {}
     obj['status'] = False
@@ -476,12 +498,12 @@ def crud_questions(request):
         obj['filter']['question_type'] = question_types
 
         obj['filter']['difficulty'] = [
-                                    {'value':'1','label':'One'},
-                                    {'value':'2','label':'Two'},
-                                    {'value':'3','label':'Three'},
-                                    {'value':'4','label':'Four'},
-                                    {'value':'5','label':'Five'},
-                                    {'value':'6','label':'Six'},
+                                    {'value':'1','label':'1'},
+                                    {'value':'2','label':'2'},
+                                    {'value':'3','label':'3'},
+                                    {'value':'4','label':'4'},
+                                    {'value':'5','label':'5'},
+                                    {'value':'6','label':'6'},
                                     ]
 
         obj['filter']['is_passage'] = [{'value':'','label':'None'},
@@ -515,7 +537,7 @@ def crud_questions(request):
         solution                = get_param(request, 'solution', None)
         topic_id                = get_param(request, 'topic_id', None)
         total_num_set_answers   = get_param(request, 'num_set', 1)
-        difficulty_user         = get_param(request, 'difficulty', None)
+        difficulty_user         = get_param(request, 'difficulty', "1")
         to_evaluate             = get_param(request, 'to_evaluate', "1")
         is_passage              = get_param(request, 'is_passage', "1")
         passage_id              = get_param(request, 'passage_id', None)
@@ -562,31 +584,37 @@ def crud_questions(request):
             except:
                 folder = None
 
+            if difficulty_user not in difficulty_types_list:
+                difficulty_user = "0"
+
 
             ts = time.time()
             created_at = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             answer_options = json.loads(answer_options)
             correct_answer = json.loads(correct_answer)            
-            question = Questions.objects.create(
-                question_text            = question_text,
-                question_type            = question_type,
-                topic                    = topic,
-                total_num_set_answers    = total_num_set_answers,
-                difficulty_user          = int(difficulty_user),
-                to_evaluate              = to_evaluate,
-                solution                 = solution,
-                is_passage               = is_passage,
-                passage                  = passage,
-                answer_options           = answer_options,
-                correct_answer           = correct_answer,
-                is_random_order          = is_random_order,
-                created_at               = created_at,
-                modified_at              = created_at,
-                created_by               = user,
-                question_folder          = folder,
-            )
-            tranObjs = [question]
-            obj['message'] = "Question Created"
+            if question_type in question_types_list:
+                question = Questions.objects.create(
+                    question_text            = question_text,
+                    question_type            = question_type,
+                    topic                    = topic,
+                    total_num_set_answers    = total_num_set_answers,
+                    difficulty_user          = int(difficulty_user),
+                    to_evaluate              = to_evaluate,
+                    solution                 = solution,
+                    is_passage               = is_passage,
+                    passage                  = passage,
+                    answer_options           = answer_options,
+                    correct_answer           = correct_answer,
+                    is_random_order          = is_random_order,
+                    created_at               = created_at,
+                    modified_at              = created_at,
+                    created_by               = user,
+                    question_folder          = folder,
+                )
+                tranObjs = [question]
+                obj['message'] = "Question Created"
+            else:
+                obj['message'] = "Incorrect Question Type"
 
     if operation == "update":
         data_id                 = get_param(request, 'data_id', None)
@@ -594,7 +622,7 @@ def crud_questions(request):
         question_type           = get_param(request, 'question_type', None)
         topic_id                = get_param(request, 'topic_id', None)
         total_num_set_answers   = get_param(request, 'num_set', 1)
-        difficulty_user         = get_param(request, 'difficulty', None)
+        difficulty_user         = get_param(request, 'difficulty', "0")
         to_evaluate             = get_param(request, 'to_evaluate', True)
         is_passage              = get_param(request, 'is_passage', True)
         solution                = get_param(request, 'solution', None)
@@ -611,6 +639,10 @@ def crud_questions(request):
         obj['message'] = "Question Not Found"
         if question:
             
+
+            if difficulty_user not in difficulty_types_list:
+                difficulty_user = "0"
+
             if is_passage == "1":
                 is_passage = True
             else:
@@ -644,7 +676,6 @@ def crud_questions(request):
                 folder = QuestionFolder.objects.get(id=question_folder)
             except:
                 folder = None            
-            
             question.question_text            = question_text
             question.question_type            = question_type
             question.topic                    = topic
