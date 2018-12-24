@@ -528,7 +528,7 @@ def crud_questions(request):
                 'value':topic.id,
                 'label':topic.category + " - " + topic.sub_category
             })
-
+        obj['filter']['folders'] = []
         folders = QuestionFolder.objects.all()
         for folder in folders:
             obj['filter']['folders'].append({
