@@ -25,6 +25,7 @@ question_types = {
                   'in_question_word':'In Question Word',
                   'in_question_number':'In Question Number',                                                                    
                   }
+
 question_types_list = [
                  'mcq_single'
                 ,'mcq_multiple'
@@ -71,7 +72,8 @@ def crud_topics(request):
             # Filters/Sorting Start
 
             if category !=None and category !="" and category != "none":
-                tranObjs = tranObjs.filter(category=category)
+                category_list = category.split(",")
+                tranObjs = tranObjs.filter(category__in=category_list)
 
             if search !=None and search !="":
                 tranObjs = tranObjs.filter(Q(category__icontains=search) | Q(sub_category__icontains=search) | Q(description__icontains=search))
@@ -428,7 +430,8 @@ def crud_questions(request):
             tranObjs = Questions.objects.all()
             # Filters/Sorting Start
             if folder_id !=None and  folder_id !="" and folder_id != "none":
-                tranObjs = tranObjs.filter(question_folder__id = folder_id)
+                folder_id_list = folder_id.split(",")
+                tranObjs = tranObjs.filter(question_folder__id__in = folder_id_list)
 
             if search !=None and search !=""  and search != "none":
                 tranObjs = tranObjs.filter(question_text__icontains=search)
@@ -524,6 +527,13 @@ def crud_questions(request):
             obj['filter']['topics'].append({
                 'value':topic.id,
                 'label':topic.category + " - " + topic.sub_category
+            })
+
+        folders = QuestionFolder.objects.all()
+        for folder in folders:
+            obj['filter']['folders'].append({
+                'value':folder.id,
+                'label':folder.folder_name
             })
 
 
