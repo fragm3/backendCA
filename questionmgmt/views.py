@@ -599,7 +599,7 @@ def crud_questions(request):
             if difficulty_user not in difficulty_types_list:
                 difficulty_user = "0"
 
-
+            
             ts = time.time()
             created_at = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             answer_options = json.loads(answer_options)
@@ -749,28 +749,31 @@ def crud_questions(request):
         else:
             user_out = str(trans.created_by)
 
-        obj['result'].append({
-        'id':trans.id,
-        'question_text':trans.question_text,        
-        'question_type':{"value":trans.question_type,"label":question_types[trans.question_type]},           
-        # 'topic': serializers.serialize("json", trans.topic),          
-        'topic': topic_out,          
-        'total_num_set_answers':trans.total_num_set_answers,    
-        'difficulty_user':trans.difficulty_user,   
-        'to_evaluate':trans.to_evaluate,  
-        'solution':trans.solution,  
-        'is_passage':trans.is_passage, 
-        'passage':passage_out,
-        'num_correct_answered':trans.num_correct_answered,
-        'num_total_answered':trans.num_total_answered,
-        'answer_options':trans.answer_options,
-        'correct_answer':trans.correct_answer,
-        'is_random_order':trans.is_random_order,
-        'created_at':str(trans.created_at),
-        'modified_at':str(trans.modified_at),
-        'created_by':user_out,
-        'question_folder':folder_out         
-    })
+        try:
+            obj['result'].append({
+            'id':trans.id,
+            'question_text':trans.question_text,        
+            'question_type':{"value":trans.question_type,"label":question_types[trans.question_type]},           
+            # 'topic': serializers.serialize("json", trans.topic),          
+            'topic': topic_out,          
+            'total_num_set_answers':trans.total_num_set_answers,    
+            'difficulty_user':trans.difficulty_user,   
+            'to_evaluate':trans.to_evaluate,  
+            'solution':trans.solution,  
+            'is_passage':trans.is_passage, 
+            'passage':passage_out,
+            'num_correct_answered':trans.num_correct_answered,
+            'num_total_answered':trans.num_total_answered,
+            'answer_options':trans.answer_options,
+            'correct_answer':trans.correct_answer,
+            'is_random_order':trans.is_random_order,
+            'created_at':str(trans.created_at),
+            'modified_at':str(trans.modified_at),
+            'created_by':user_out,
+            'question_folder':folder_out         
+        })
+        except:
+            None
     obj['status'] = True
     return HttpResponse(json.dumps(obj), content_type='application/json')
 
