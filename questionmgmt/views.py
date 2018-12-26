@@ -732,22 +732,22 @@ def crud_questions(request):
         if trans.passage:
             passage_out = json.loads(str(trans.passage))
         else:
-            passage_out = str(trans.passage)
+            passage_out = json.loads({'id':'','header':'','text':'','data_table' : []})
         
         if trans.topic:
             topic_out = json.loads(str(trans.topic))
         else:
-            topic_out = json.loads({"id":"","category":"","sub_category":""})
+            topic_out = json.loads({'id':'','category':'','sub_category':''})
 
         if trans.question_folder:
             folder_out = json.loads(str(trans.question_folder))
         else:
-            folder_out = str(trans.question_folder)
+            folder_out = json.loads({'id':'','folder_name':''})
 
         if trans.created_by:
             user_out = json.loads(str(trans.created_by))
         else:
-            user_out = str(trans.created_by)
+            user_out = json.loads({'id':'','first_name':'' ,'last_name':'','email':''})
 
         try:
             obj['result'].append({
