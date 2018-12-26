@@ -737,7 +737,7 @@ def crud_questions(request):
         if trans.topic:
             topic_out = json.loads(str(trans.topic))
         else:
-            topic_out = str(trans.topic)
+            topic_out = json.loads({"id":"","category":"","sub_category":""})
 
         if trans.question_folder:
             folder_out = json.loads(str(trans.question_folder))

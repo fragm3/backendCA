@@ -25,7 +25,7 @@ class QuestionFolder(models.Model):
     folder_name = models.CharField(max_length=100)
     description  = models.CharField(max_length=300,null=True)
     def __str__(self):
-        return json.dumps({'id':self.id,'category':self.folder_name})
+        return json.dumps({'id':self.id,'folder_name':self.folder_name})
 
 
 class QuestionStructure(models.Model):
